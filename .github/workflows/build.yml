@@ -1,0 +1,94 @@
+name: Build Aurum Bullion
+
+on:
+  push:
+    branches: ['main', 'master']
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    environment: prod
+
+    # Apply environment variables globally to all steps in this job
+    env:
+      npm_config_runtime: electron
+      npm_config_target: 28.3.3
+      npm_config_disturl: https://electronjs.org/headers
+      npm_config_build_from_source: false
+
+    strategy:
+      matrix:
+        # os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [windows-latest]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Linux Build Dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsecret-1-dev libssl-dev
+
+      - name: Install Project Dependencies
+        run: |
+          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+          git config --global url."https://github.com/".insteadOf git@github.com:
+          npm install --ignore-scripts
+
+      - name: Rebuild Native Dependencies
+        # Use electron-builder's own tool which is better at finding prebuilts for Windows
+        run: npx electron-builder install-app-deps
+
+      - name: Compile and Bundle Source Code
+        run: npm run build
+
+      - name: Package Windows Distributable
+        if: matrix.os == 'windows-latest'
+        run: npm run dist:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package macOS Distributable
+        if: matrix.os == 'macos-latest'
+        run: npm run dist:mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package Linux Distributable
+        if: matrix.os == 'ubuntu-latest'
+        run: npm run dist:linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Artifacts (GitHub)
+        uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: Aurum-Ledger-${{ runner.os }}
+          path: |
+            release/*.exe
+            release/*.dmg
+            release/*.AppImage
+            release/*.deb
+          retention-days: 2
+
+      - name: Upload Artifacts (Google Drive)
+        uses: Jumbo810/Upload_Github_Artifacts_TO_GDrive@d9619b05e87660e5e0f7c4d5c431c735845f4982
+
+        with:
+          target: 'release/*.{exe,dmg,AppImage,deb}'
+
+          credentials: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
+          parent_folder_id: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
+
+          child_folder: 'Builds/${{ github.ref_name }}/${{ github.run_number }}'

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Aurum Bullion — Enterprise Jewellery Accounting System." />
+    <title>Aurum Bullion | Enterprise Jewellery Accounting</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="shortcut icon" href="/favicon.png" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #080e1a;
+      }
+      .loading-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at center, #0f172a 0%, #080e1a 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      .loading-logo {
+        margin-bottom: 32px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .logo-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 40px;
+        color: #080e1a;
+        box-shadow: 0 0 40px rgba(217, 119, 6, 0.3);
+        animation: logoPulse 2s infinite ease-in-out;
+      }
+      .loading-status-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+      .loading-spinner {
+        width: 24px;
+        height: 24px;
+        border: 2px solid rgba(56, 189, 248, 0.1);
+        border-top: 2px solid #38bdf8;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      .loading-text {
+        color: #f1f5f9;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .loading-subtext {
+        color: #94a3b8;
+        font-size: 14px;
+        font-weight: 400;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      @keyframes logoPulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(217, 119, 6, 0.3); }
+        50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(217, 119, 6, 0.5); }
+      }
+    </style>
+  </head>
+  <body class="antialiased">
+    <div id="root">
+      <div class="loading-container">
+        <div class="loading-logo">
+          <div class="logo-icon">AL</div>
+        </div>
+        <div class="loading-status-container">
+          <div class="loading-text">Aurum Bullion</div>
+          <div class="loading-spinner"></div>
+          <div class="loading-subtext">Setting up things for you...</div>
+        </div>
+      </div>
+    </div>
+    <div id="modal-root"></div>
+    <script type="module" src="/main.tsx"></script>
+  </body>
+</html>
