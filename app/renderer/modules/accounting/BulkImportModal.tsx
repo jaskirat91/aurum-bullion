@@ -61,7 +61,7 @@ export function BulkImportModal({ onClose, onImportStarted }: BulkImportModalPro
         if (res.success && res.data) {
           onImportStarted(res.data.importId);
         } else {
-          setError(res.error || 'Failed to import bank statement.');
+          setError((res as any).error || 'Failed to import bank statement.');
         }
         setLoading(false);
       };
@@ -108,7 +108,9 @@ export function BulkImportModal({ onClose, onImportStarted }: BulkImportModalPro
                 setBankAccountName(name);
               }}
               inputRef={accountSelectRef}
-              placeholder="Select Bank/Cash Account..."
+              allowedTypes={['ASSET']}
+              allowedSubtypes={['CASH']}
+              // placeholder="Select Bank/Cash Account..."
             />
           </div>
 

@@ -142,10 +142,10 @@ export function AccountsManager() {
               className="rounded-2xl py-3 w-full"
             />
           </div>
-          <div className="flex gap-2 w-full sm:w-auto">
+          {/* <div className="flex gap-2 w-full sm:w-auto">
              <Button variant="ghost" icon={<Filter size={18} />} className="rounded-2xl flex-1 px-4">Filters</Button>
              <Button variant="ghost" icon={<Download size={18} />} className="rounded-2xl flex-1 px-4">Export</Button>
-          </div>
+          </div> */}
         </div>
       </div>
 

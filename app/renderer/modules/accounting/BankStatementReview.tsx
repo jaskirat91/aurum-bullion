@@ -170,10 +170,11 @@ export function BankStatementReview({ importId, onClose, onSuccess }: BankStatem
                 <th className="border px-3 py-2 font-black uppercase tracking-widest text-left w-[110px]">Time</th>
                 <th className="border px-3 py-2 font-black uppercase tracking-widest text-left">Narration</th>
                 <th className="border px-3 py-2 font-black uppercase tracking-widest text-left w-[250px]">Mapped Party</th>
+                <th className="border px-3 py-2 font-black uppercase tracking-widest text-center w-[60px]">Conf.</th>
                 <th className="border px-3 py-2 font-black uppercase tracking-widest text-right w-[120px]">Amount</th>
                 <th className="border px-3 py-2 font-black uppercase tracking-widest text-center w-[80px]">Type</th>
-                <th className="border px-3 py-2 font-black uppercase tracking-widest text-center w-[80px]">Conf.</th>
-                <th className="border px-3 py-2 font-black uppercase tracking-widest text-left w-[150px]">Remarks</th>
+                <th className="border px-3 py-2 font-black uppercase tracking-widest text-left w-[180px]">Remarks</th>
+                <th className="border px-3 py-2 font-black uppercase tracking-widest text-center w-[100px]">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/20">
@@ -217,6 +218,14 @@ export function BankStatementReview({ importId, onClose, onSuccess }: BankStatem
                       className="h-8 text-[10px] font-bold"
                     />
                   </td>
+                  <td className="text-[10px] font-black uppercase flex items-center justify-center">
+                    {
+                      row.confidenceScore >= 90 ? <span className="flex w-3 h-3 bg-success rounded-full"></span> :
+                      row.confidenceScore >= 85 ? <span className="flex w-3 h-3 bg-warning rounded-full"></span> : 
+                      <span className="flex w-3 h-3 bg-danger rounded-full"></span>
+                    }
+                    {/* {row.confidenceScore}% */}
+                  </td>
                   <td className="border px-1 py-1">
                     <input type="number" className="w-full bg-transparent p-1 text-right font-bold text-[11px] focus:ring-1 ring-primary rounded" 
                       value={row.amount} onChange={(e) => handleUpdateRow(row.id, { amount: parseFloat(e.target.value) || 0 })} />
@@ -227,12 +236,13 @@ export function BankStatementReview({ importId, onClose, onSuccess }: BankStatem
                       <option value="CR">CR</option>
                       <option value="DR">DR</option>
                     </select>
-                  </td>
-                  <td className="border px-2 py-2 text-center text-[10px] font-black uppercase">{row.confidenceScore}%</td>
-                  <td className="border px-1 py-1 flex items-center gap-1">
+                  </td>                  
+                  <td className="border px-1 py-2">
                     <input className="w-full bg-transparent p-1 text-[11px] focus:ring-1 ring-primary rounded" 
-                      value={row.remarks || ''} onChange={(e) => handleUpdateRow(row.id, { remarks: e.target.value })} />
-                    <button onClick={() => handleToggleExclude(row)} className={`p-1 rounded-md ${row.status === 'EXCLUDED' ? 'text-primary' : 'text-danger'}`}>
+                      value={row.remarks || ''} onChange={(e) => handleUpdateRow(row.id, { remarks: e.target.value })} />                    
+                  </td>
+                  <td className=" px-1 py-2 flex items-center justify-center">
+                      <button onClick={() => handleToggleExclude(row)} className={`p-1 rounded-md ${row.status === 'EXCLUDED' ? 'text-primary' : 'text-danger'}`}>
                         <Trash2 size={14} />
                     </button>
                   </td>

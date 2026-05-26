@@ -13,7 +13,7 @@ import { Sun, Moon, Building2, Calendar, ChevronDown, Package, Send, Coins, Arch
 import { DeveloperInfo } from '@/components/about/DeveloperInfo';
 import aurumLogo from './icon.png';
 
-type Module = 'INVENTORY' | 'MANUFACTURING' | 'ACCOUNTING' | 'PARTIES' | 'REPORTS';
+type Module = 'INVENTORY' | /*'MANUFACTURING' |*/ 'ACCOUNTING' | 'PARTIES' | 'REPORTS';
 
 interface SubNavItem {
   id: string;
@@ -39,22 +39,22 @@ const NAV: NavItem[] = [
     activeColor: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
     subItems: [
       { id: 'ITEMS', label: 'Items Master', icon: Package },
-      { id: 'STOCKS', label: 'Finished Stock', icon: Archive },
+      // { id: 'STOCKS', label: 'Finished Stock', icon: Archive },
       // { id: 'SELL_STOCK', label: 'Sell Stock', icon: ShoppingCart },
     ]
   },
-  {
-    id: 'MANUFACTURING',
-    label: 'Manufacturing',
-    icon: '⬡',
-    gradient: 'from-violet-500 to-purple-600',
-    activeColor: 'text-violet-400 bg-violet-500/10 border-violet-500/20',
-    subItems: [
-      { id: 'RAW_RECEIPT', label: 'Receive Raw Material', icon: Inbox },
-      { id: 'ISSUE_MATERIAL', label: 'Issue Material', icon: Send },
-      { id: 'FINISHED_RECEIPT', label: 'Receive Finished Goods', icon: Factory },
-    ]
-  },
+  // {
+  //   id: 'MANUFACTURING',
+  //   label: 'Manufacturing',
+  //   icon: '⬡',
+  //   gradient: 'from-violet-500 to-purple-600',
+  //   activeColor: 'text-violet-400 bg-violet-500/10 border-violet-500/20',
+  //   subItems: [
+  //     { id: 'RAW_RECEIPT', label: 'Receive Raw Material', icon: Inbox },
+  //     { id: 'ISSUE_MATERIAL', label: 'Issue Material', icon: Send },
+  //     { id: 'FINISHED_RECEIPT', label: 'Receive Finished Goods', icon: Factory },
+  //   ]
+  // },
   {
     id: 'ACCOUNTING',
     label: 'Accounting',
@@ -64,8 +64,8 @@ const NAV: NavItem[] = [
     subItems: [
       { id: 'ACCOUNTS',      label: 'Accounts',       icon: Folder  },
       { id: 'JOURNAL',       label: 'Manage Journal',  icon: Repeat  },
-      { id: 'SALE_VOUCHER',  label: 'Sale Vouchers',   icon: Receipt },
-      { id: 'SALE_RETURN_VOUCHER', label: 'Sales Return Vouchers',  icon: Receipt },
+      // { id: 'SALE_VOUCHER',  label: 'Sale Vouchers',   icon: Receipt },
+      // { id: 'SALE_RETURN_VOUCHER', label: 'Sales Return Vouchers',  icon: Receipt },
       { id: 'CASH_VOUCHER',  label: 'Cash Vouchers',   icon: Wallet  },
       { id: 'GOLD_VOUCHER',  label: 'Gold Vouchers',   icon: Coins   },
       { id: 'CUSTOMER_ORDERS', label: 'Customer Orders', icon: Receipt },
@@ -91,11 +91,11 @@ const NAV: NavItem[] = [
     activeColor: 'text-pink-400 bg-pink-500/10 border-pink-500/20',
     subItems: [
       // { id: 'PARTY_LEDGER', label: 'Party Ledger Report', icon: FileText },
-      { id: 'ACCOUNT_LEDGER', label: 'Account Ledger Report', icon: FileText },
+      // { id: 'ACCOUNT_LEDGER', label: 'Account Ledger Report', icon: FileText },
       { id: 'ACCOUNT_STATEMENT', label: 'Account Statement', icon: FileText },
       // { id: 'CUSTOMER_PURCHASE_LEDGER', label: 'Customer Purchase Ledger', icon: FileText },
-      { id: 'BATCH_TRACKING', label: 'Batch Tracking Report', icon: BarChart3 },
-      { id: 'KARIGAR_CONSUMABLES', label: 'Karigar Consumables', icon: BarChart3 },
+      // { id: 'BATCH_TRACKING', label: 'Batch Tracking Report', icon: BarChart3 },
+      // { id: 'KARIGAR_CONSUMABLES', label: 'Karigar Consumables', icon: BarChart3 },
       { id: 'LENA_DENA', label: 'Lena Dena Report', icon: FileText },
     ]
   },
@@ -134,7 +134,7 @@ export default function App() {
       <div className="fixed inset-0 bg-[#080e1a] flex flex-col items-center justify-center z-[9999] font-sans">
         <div className="mb-8 relative flex items-center justify-center">
           <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-2xl flex items-center justify-center font-black text-4xl text-[#080e1a] shadow-[0_0_40px_rgba(217,119,6,0.3)] animate-pulse">
-            AL
+            AB
           </div>
         </div>
         <div className="flex flex-col items-center gap-3">
