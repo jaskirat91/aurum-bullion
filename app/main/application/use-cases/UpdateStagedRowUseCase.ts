@@ -9,6 +9,7 @@ export interface UpdateStagedRowDTO {
   type?: string;
   remarks?: string;
   status?: string;
+  entryTime?: string;
 }
 
 export class UpdateStagedRowUseCase {
@@ -33,6 +34,7 @@ export class UpdateStagedRowUseCase {
     if (dto.type !== undefined) row.type = dto.type;
     if (dto.remarks !== undefined) row.remarks = dto.remarks;
     if (dto.status !== undefined) row.status = dto.status;
+    if (dto.entryTime !== undefined) row.entryTime = dto.entryTime;
 
     await rowRepo.save(row);
   }

@@ -12,11 +12,13 @@ export class FinalizeBankImportUseCase {
     if (!session) throw new Error('Import session not found.');
 
     // Duplicate check
-    const existingSuccessfulImport = await importRepo.findOne({ 
-      where: { uploadedFileHash: session.uploadedFileHash, status: 'PROCESSED' } 
+    const existingSuccessfulImport = await importRepo.findOne({
+      where: { uploadedFileHash: session.uploadedFileHash, status: 'PROCESSED' },
     });
     if (existingSuccessfulImport) {
-        throw new Error(`This file has already been successfully processed on ${existingSuccessfulImport.createdAt.toLocaleDateString()}`);
+      throw new Error(
+        `This file has already been successfully processed on ${existingSuccessfulImport.createdAt.toLocaleDateString()}`,
+      );
     }
 
     const rowRepo = AppDataSource.getRepository(BankStatementRow);
@@ -47,12 +49,15 @@ export class FinalizeBankImportUseCase {
           receiptAmount: row.type === 'CR' ? row.amount : 0,
           paymentAmount: row.type === 'DR' ? row.amount : 0,
           narration: row.narration,
-          action: 'POST'
+          remarks: row.remarks,
+          remarksTime: row.entryTime,
+          action: 'POST',
         });
 
         if (result.success) {
           row.status = 'CREATED';
-          row.remarks = (row.remarks ? row.remarks + ' | ' : '') + `Voucher Created: ${result.voucherNo}`;
+          row.remarks =
+            (row.remarks ? row.remarks + ' | ' : '') + `Voucher Created: ${result.voucherNo}`;
           await rowRepo.save(row);
           createdCount++;
         } else {
@@ -66,7 +71,7 @@ export class FinalizeBankImportUseCase {
       }
     }
 
-    session.status = failedCount === 0 ? 'PROCESSED' : (createdCount > 0 ? 'PARTIAL' : 'FAILED');
+    session.status = failedCount === 0 ? 'PROCESSED' : createdCount > 0 ? 'PARTIAL' : 'FAILED';
     await importRepo.save(session);
 
     return { createdCount, failedCount };
@@ -76,7 +81,7 @@ export class FinalizeBankImportUseCase {
     const partyRepo = AppDataSource.getRepository('Party'); // Avoid circular if any, but string name works
     const party: any = await partyRepo.findOne({ where: { id: partyId } });
     if (!party || !party.ledger_account_id) {
-        throw new Error(`Party ${partyId} does not have a linked ledger account.`);
+      throw new Error(`Party ${partyId} does not have a linked ledger account.`);
     }
     return party.ledger_account_id;
   }

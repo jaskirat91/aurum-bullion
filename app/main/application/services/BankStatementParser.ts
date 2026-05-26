@@ -32,12 +32,31 @@ const HEADER_MAP = {
     'transaction details',
     'comment',
     'description of transaction',
+    'transaction remarks',
   ],
-  DEBIT: ['debit', 'withdrawal', 'dr', 'debit amount', 'out', 'withdrawals', 'withdrawal amt.'],
-  CREDIT: ['credit', 'deposit', 'cr', 'credit amount', 'in', 'deposits', 'deposit amt.'],
+  DEBIT: [
+    'debit',
+    'withdrawal',
+    'dr',
+    'debit amount',
+    'out',
+    'withdrawals',
+    'withdrawal amt.',
+    'withdrawal amount(inr)',
+  ],
+  CREDIT: [
+    'credit',
+    'deposit',
+    'cr',
+    'credit amount',
+    'in',
+    'deposits',
+    'deposit amt.',
+    'deposit amount(inr)',
+  ],
   AMOUNT: ['amount', 'transaction amount', 'net amount'],
   DRCR: ['dr/cr', 'type', 'transaction type', 'indicator', 'cr/dr'],
-  BALANCE: ['balance', 'running balance', 'closing balance', 'total'],
+  BALANCE: ['balance', 'running balance', 'closing balance', 'total', 'balance(inr)'],
   REF_NO: [
     'reference no',
     'ref no',
@@ -48,6 +67,7 @@ const HEADER_MAP = {
     'reference number',
     'chq/ref no.',
     'chq./ref.no.',
+    'cheque number',
   ],
 };
 
@@ -80,13 +100,13 @@ export class BankStatementParser {
       const row = rawRows[i].filter((c) => c !== null && c !== undefined);
       if (row.length === 0) continue;
 
-      const rowStr = row.map((c) => String(c).toLowerCase());
+      const rowStr = row.map((c) => String(c)?.toLowerCase());
 
       let matches: string[] = [];
       Object.entries(HEADER_MAP)
-        .filter(([key, value]) => key == 'NARRATION')
+        .filter(([key, value]) => key == 'NARRATION' || key == 'DATE')
         .forEach(([key, synonyms]) => {
-          if (rowStr.some((c) => synonyms.some((s) => c.includes(s)))) {
+          if (rowStr.some((c) => synonyms.some((s) => c?.includes(s)))) {
             matches.push(key);
           }
         });
@@ -96,7 +116,7 @@ export class BankStatementParser {
         rowStr,
       );
 
-      if (matches.length >= 1) {
+      if (matches.length >= 2) {
         // Reduced threshold to 1 for debugging
         headerIndex = i;
         console.log(`Header found at row ${i} with keys: ${matches.join(', ')}`);
@@ -115,12 +135,18 @@ export class BankStatementParser {
     let dateRowEndIndex = -1;
     const mapping = this.detectHeaders(rawRows[headerIndex]);
     console.log(`mapping: ${JSON.stringify(mapping)}`);
+    console.log(`Raw rows: ${JSON.stringify(rawRows)}`);
+
+    const dateColumnIndex = rawRows[headerIndex].findIndex(
+      (col: string) => col?.toLowerCase() === mapping.DATE?.toLowerCase(),
+    );
+    console.log(`Date column index: ${dateColumnIndex}`);
 
     for (let i = headerIndex + 1; i < rawRows.length; i++) {
       const row = rawRows[i];
-      const rowStr = row.map((c) => String(c).toLowerCase());
-      const date = rowStr[0];
-      // console.log(`Checking row ${i}: date: ${date}, rowStr: ${JSON.stringify(rowStr)}`);
+      const rowStr = row.map((c) => String(c)?.toLowerCase());
+      const date = rowStr[dateColumnIndex];
+      console.log(`Checking row ${i}: date: ${date}, rowStr: ${JSON.stringify(rowStr)}`);
       if (this.isValidDate(date)) {
         dateRowStartIndex = i;
         break;
@@ -129,10 +155,10 @@ export class BankStatementParser {
 
     for (let i = dateRowStartIndex + 1; i < rawRows.length; i++) {
       const row = rawRows[i];
-      const rowStr = row.map((c) => String(c).toLowerCase());
+      const rowStr = row.map((c) => String(c)?.toLowerCase());
       // const mapping = this.detectHeaders(rawRows[headerIndex + 1]);
-      const date = rowStr[0];
-      console.log(`Checking end date index ${i}: date: ${date}, rowStr: ${JSON.stringify(rowStr)}`);
+      const date = rowStr[dateColumnIndex];
+      // console.log(`Checking end date index ${i}: date: ${date}, rowStr: ${JSON.stringify(rowStr)}`);
       if (this.isValidDate(date)) {
         continue;
       }
@@ -141,8 +167,8 @@ export class BankStatementParser {
     }
     console.log(`Date row start index: ${dateRowStartIndex}`);
     console.log(`Date row end index: ${dateRowEndIndex}`);
-    console.log(`Header Index: ${headerIndex}`);
-    console.log(`Headers: ${rawRows[headerIndex]}`);
+    // console.log(`Header Index: ${headerIndex}`);
+    // console.log(`Headers: ${rawRows[headerIndex]}`);
     // Convert from headerIndex onwards into object array
     const headers = rawRows[headerIndex];
     const data = rawRows
@@ -190,13 +216,13 @@ export class BankStatementParser {
         };
 
         // Ensure amount logic
-        if (amount !== undefined) {
+        if (amount !== undefined && amount != 0) {
           normalized.amount = Math.abs(amount);
           normalized.type = amount < 0 ? 'DR' : 'CR';
-        } else if (dr !== undefined) {
+        } else if (dr !== undefined && dr != 0) {
           normalized.amount = dr;
           normalized.type = 'DR';
-        } else if (cr !== undefined) {
+        } else if (cr !== undefined && cr != 0) {
           normalized.amount = cr;
           normalized.type = 'CR';
         }
@@ -224,10 +250,10 @@ export class BankStatementParser {
 
     for (const [key, synonyms] of Object.entries(HEADER_MAP)) {
       const found = headers.find((h) => {
-        const normalizedH = h.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const normalizedH = h?.toLowerCase().replace(/[^a-z0-9]/g, '');
         return synonyms.some((s) => {
-          const normalizedS = s.toLowerCase().replace(/[^a-z0-9]/g, '');
-          return normalizedH === normalizedS || normalizedH.includes(normalizedS);
+          const normalizedS = s?.toLowerCase().replace(/[^a-z0-9]/g, '');
+          return normalizedH === normalizedS; // || normalizedH?.includes(normalizedS);
         });
       });
       if (found) mapping[key] = found;
@@ -249,10 +275,12 @@ export class BankStatementParser {
   private isValidDate(date: any): boolean {
     if (!date) return false;
     // Format of incoming date is DD/MM/YY e.g 25/05/26
-    return moment(date, ['DD/MM/YY', 'DD/MM/YYYY'], true).isValid();
+    return moment(date, ['DD/MM/YY', 'DD/MM/YYYY', 'DD,MM,YY', 'DD,MM,YYYY'], true).isValid();
   }
 
   private parseDate(date: any): string {
-    return moment(date, ['DD/MM/YY', 'DD/MM/YYYY'], true).toISOString(true).split('T')[0];
+    return moment(date, ['DD/MM/YY', 'DD/MM/YYYY', 'DD,MM,YY', 'DD,MM,YYYY'], true)
+      .toISOString(true)
+      .split('T')[0];
   }
 }

@@ -10,6 +10,7 @@ import { useConfirm } from '../../context/ConfirmationContext';
 interface BankRow {
   id: string;
   entryDate: string;
+  entryTime?: string;
   narration: string;
   amount: number;
   type: 'DR' | 'CR';
@@ -67,6 +68,17 @@ export function BankStatementReview({ importId, onClose, onSuccess }: BankStatem
   };
 
   const handleFinalize = async () => {
+    const timeRegex = /^(0[1-9]|1[0-2]):[0-5][0-9] (AM|PM)$/i;
+    const invalidTimes = rows.filter(r => r.status === 'PENDING' && r.entryTime && !timeRegex.test(r.entryTime));
+    if (invalidTimes.length > 0) {
+      await alert({
+        title: 'Invalid Time Format',
+        message: `There are ${invalidTimes.length} transactions with invalid time format. Time must be in HH:MM AM/PM format (e.g. 12:45 PM or 09:15 AM) or left empty.`,
+        type: 'error'
+      });
+      return;
+    }
+
     const unknownParties = rows.filter(r => !r.detectedPartyId && r.status === 'PENDING').length;
     if (unknownParties > 0) {
       const confirmed = await confirm({
@@ -155,6 +167,7 @@ export function BankStatementReview({ importId, onClose, onSuccess }: BankStatem
             <thead>
               <tr className="bg-background/40 border-b border-border/40">
                 <th className="border px-3 py-2 font-black uppercase tracking-widest text-left w-[100px]">Date</th>
+                <th className="border px-3 py-2 font-black uppercase tracking-widest text-left w-[110px]">Time</th>
                 <th className="border px-3 py-2 font-black uppercase tracking-widest text-left">Narration</th>
                 <th className="border px-3 py-2 font-black uppercase tracking-widest text-left w-[250px]">Mapped Party</th>
                 <th className="border px-3 py-2 font-black uppercase tracking-widest text-right w-[120px]">Amount</th>
@@ -165,17 +178,31 @@ export function BankStatementReview({ importId, onClose, onSuccess }: BankStatem
             </thead>
             <tbody className="divide-y divide-border/20">
               {loading ? (
-                <tr><td colSpan={7} className="px-4 py-16 text-center">
+                <tr><td colSpan={8} className="px-4 py-16 text-center">
                   <div className="flex flex-col items-center gap-3 text-text-muted animate-pulse">
                     <Search size={32} className="text-primary/20" />
                     <span className="text-[10px] font-black uppercase tracking-widest">Loading transactions...</span>
                   </div>
                 </td></tr>
               ) : rows.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-16 text-center text-text-muted italic">No transactions found for this import.</td></tr>
+                <tr><td colSpan={8} className="px-4 py-16 text-center text-text-muted italic">No transactions found for this import.</td></tr>
               ) : rows.map((row) => (
                 <tr key={row.id} className={`group hover:bg-primary/5 transition-colors ${row.status === 'EXCLUDED' ? 'bg-background/20 opacity-50 line-through' : ''}`}>
                   <td className="border px-3 py-2 font-bold text-[10px]">{formatDate(row.entryDate)}</td>
+                  <td className="border px-1 py-1">
+                    <input 
+                      type="text"
+                      placeholder="HH:MM AM/PM"
+                      maxLength={8}
+                      className={`w-full bg-transparent p-1 font-medium text-[11px] focus:ring-1 ring-primary rounded ${
+                        row.entryTime && !/^(0[1-9]|1[0-2]):[0-5][0-9] (AM|PM)$/i.test(row.entryTime) 
+                          ? 'border border-red-500 focus:ring-red-500 bg-red-500/5' 
+                          : ''
+                      }`}
+                      value={row.entryTime || ''}
+                      onChange={(e) => handleUpdateRow(row.id, { entryTime: e.target.value })}
+                    />
+                  </td>
                   <td className="border px-1 py-1">
                     <input className="w-full bg-transparent p-1 font-medium text-[11px] focus:ring-1 ring-primary rounded" 
                       value={row.narration} onChange={(e) => handleUpdateRow(row.id, { narration: e.target.value })} />

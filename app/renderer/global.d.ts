@@ -127,6 +127,19 @@ export interface ElectronAPI {
   cancelCashVoucher(voucherId: string): Promise<IPCResult<void>>;
   updateCashVoucher(voucherId: string, dto: any): Promise<IPCResult<{ voucherNo: string }>>;
   deleteCashVoucher(voucherId: string): Promise<IPCResult<void>>;
+  
+  // Bank Statement
+  importBankStatement(dto: {
+    bankLedgerAccountId: string;
+    filePath: string;
+    fileBuffer: ArrayBuffer;
+    fileName: string;
+    uploadedBy: string;
+  }): Promise<IPCResult<{ importId: string }>>;
+  getStagedRows(importId: string): Promise<IPCResult<any[]>>;
+  updateStagedRow(dto: any): Promise<IPCResult<void>>;
+  finalizeBankImport(importId: string): Promise<IPCResult<{ createdCount: number; failedCount: number }>>;
+
   createRateCut(dto: any): Promise<IPCResult<{ voucherNo: string }>>;
   createGoldVoucher(dto: any): Promise<IPCResult<{ voucherNo: string }>>;
   listGoldVouchers(
