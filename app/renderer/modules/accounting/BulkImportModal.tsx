@@ -109,7 +109,7 @@ export function BulkImportModal({ onClose, onImportStarted }: BulkImportModalPro
               }}
               inputRef={accountSelectRef}
               allowedTypes={['ASSET']}
-              allowedSubtypes={['CASH']}
+              allowedSubtypes={['CASH', 'BANK']}
               // placeholder="Select Bank/Cash Account..."
             />
           </div>
