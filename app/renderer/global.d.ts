@@ -18,10 +18,7 @@ export interface ElectronAPI {
   createJournalEntry(
     dto: unknown,
   ): Promise<IPCResult<{ journalEntryId: string; voucherNo: string }>>;
-  updateJournalEntry(
-    id: string,
-    dto: unknown,
-  ): Promise<IPCResult<{ voucherNo: string }>>;
+  updateJournalEntry(id: string, dto: unknown): Promise<IPCResult<{ voucherNo: string }>>;
   deleteJournalEntry(id: string): Promise<IPCResult<void>>;
   createFinishedProduct(dto: any): Promise<IPCResult<{ finishedProductId: string }>>;
   updateFinishedProduct(dto: any): Promise<IPCResult<void>>;
@@ -127,7 +124,7 @@ export interface ElectronAPI {
   cancelCashVoucher(voucherId: string): Promise<IPCResult<void>>;
   updateCashVoucher(voucherId: string, dto: any): Promise<IPCResult<{ voucherNo: string }>>;
   deleteCashVoucher(voucherId: string): Promise<IPCResult<void>>;
-  
+
   // Bank Statement
   importBankStatement(dto: {
     bankLedgerAccountId: string;
@@ -138,7 +135,9 @@ export interface ElectronAPI {
   }): Promise<IPCResult<{ importId: string }>>;
   getStagedRows(importId: string): Promise<IPCResult<any[]>>;
   updateStagedRow(dto: any): Promise<IPCResult<void>>;
-  finalizeBankImport(importId: string): Promise<IPCResult<{ createdCount: number; failedCount: number }>>;
+  finalizeBankImport(
+    importId: string,
+  ): Promise<IPCResult<{ createdCount: number; failedCount: number }>>;
 
   createRateCut(dto: any): Promise<IPCResult<{ voucherNo: string }>>;
   createGoldVoucher(dto: any): Promise<IPCResult<{ voucherNo: string }>>;
@@ -180,7 +179,6 @@ export interface ElectronAPI {
   deleteSupplierOrder(voucherId: string): Promise<IPCResult<void>>;
   updateSupplierOrder(voucherId: string, dto: any): Promise<IPCResult<{ voucherNo: string }>>;
 
-
   // Setup & Initialization
   isInitialized(): Promise<boolean>;
   checkLicense(): Promise<boolean>;
@@ -189,6 +187,7 @@ export interface ElectronAPI {
     companyName: string;
     financialYear: string;
     accounts: any[];
+    contraAccounts: any[];
     defaultGoldLedgerCode: string;
     defaultCashLedgerCode: string;
   }): Promise<IPCResult<void>>;

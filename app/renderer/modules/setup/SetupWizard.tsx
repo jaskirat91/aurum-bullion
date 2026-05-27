@@ -15,9 +15,15 @@ interface SetupAccount {
 }
 
 const DEFAULT_ACCOUNTS: SetupAccount[] = [
-  { name: 'Cash in Hand', code: '1001', type: 'ASSET', subType: 'CASH', normalBalance: 'DR', unit: 'INR' },
-  { name: 'Main Bank Account', code: '1002', type: 'ASSET', subType: 'BANK', normalBalance: 'DR', unit: 'INR' },
-  { name: 'Raw Gold Stock (24K)', code: '2001', type: 'ASSET', subType: 'GOLD', normalBalance: 'DR', unit: 'GRAM' }
+  { name: 'Cash in Hand', code: 'CASH-01', type: 'ASSET', subType: 'CASH', normalBalance: 'DR', unit: 'INR' },
+  { name: 'Axis Bank Account', code: 'BANK-AXIS-01', type: 'ASSET', subType: 'BANK', normalBalance: 'DR', unit: 'INR' },
+  { name: 'HDFC Bank Account', code: 'BANK-HDFC-01', type: 'ASSET', subType: 'BANK', normalBalance: 'DR', unit: 'INR' },
+  { name: 'Pure Gold Stock (24K)', code: 'GOLD-24K-01', type: 'ASSET', subType: 'GOLD', normalBalance: 'DR', unit: 'GRAM' }
+];
+
+const DEFAULT_CONTRA_ACCOUNTS: SetupAccount[] = [
+  { name: 'Contra Cash in Hand', code: 'CONTRA-CASH-01', type: 'ASSET', subType: 'CASH', normalBalance: 'DR', unit: 'INR' },  
+  { name: 'Contra Pure Gold Stock (24K)', code: 'CONTRA-GOLD-24K-01', type: 'ASSET', subType: 'GOLD', normalBalance: 'DR', unit: 'GRAM' }
 ];
 
 interface SetupWizardProps {
@@ -42,6 +48,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
   const [companyName, setCompanyName] = useState('');
   const [financialYear] = useState(getAutoFY());
   const [accounts, setAccounts] = useState<SetupAccount[]>(DEFAULT_ACCOUNTS);
+  const [contraAccounts, setContraAccounts] = useState<SetupAccount[]>(DEFAULT_CONTRA_ACCOUNTS);
   const [defaultGoldLedgerCode, setDefaultGoldLedgerCode] = useState('2001');
   const [defaultCashLedgerCode, setDefaultCashLedgerCode] = useState('1001');
 
@@ -53,6 +60,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
         companyName, 
         financialYear,
         accounts,
+        contraAccounts,
         defaultGoldLedgerCode,
         defaultCashLedgerCode
       });

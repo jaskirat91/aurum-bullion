@@ -32,6 +32,7 @@ export class SetupService {
     companyName: string;
     financialYear: string;
     accounts: SetupAccountDTO[];
+    contraAccounts: SetupAccountDTO[];
     defaultGoldLedgerCode: string;
     defaultCashLedgerCode: string;
   }): Promise<{ success: boolean; error?: string }> {
@@ -53,7 +54,7 @@ export class SetupService {
       const accountRepo = queryRunner.manager.getRepository(Account);
       let goldLedgerId = '';
       let cashLedgerId = '';
-      for (const acc of data.accounts) {
+      for (const acc of [...data.accounts, ...data.contraAccounts]) {
         const entity = new Account();
         entity.code = acc.code;
         entity.name = acc.name;
@@ -88,8 +89,20 @@ export class SetupService {
 
       settings.defaultGoldLedgerId = goldLedgerId;
       settings.defaultCashLedgerId = cashLedgerId;
-      await settingsRepo.save(settings);
 
+      for (const contraAccount of data.contraAccounts) {
+        const acc = await accountRepo.findOne({ where: { code: contraAccount.code } });
+        if (acc && acc.id) {
+          if (contraAccount.subType === 'CASH') {
+            settings.defaultContraCashLedgerId = acc.id;
+          }
+          if (contraAccount.subType === 'GOLD') {
+            settings.defaultContraGoldLedgerId = acc.id;
+          }
+        }
+      }
+
+      await settingsRepo.save(settings);
       await queryRunner.commitTransaction();
       return { success: true };
     } catch (err: any) {

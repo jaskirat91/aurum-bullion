@@ -24,6 +24,12 @@ export class CompanySetting {
   defaultCashLedgerId!: string;
 
   @Column({ type: 'varchar', nullable: true })
+  defaultContraGoldLedgerId?: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  defaultContraCashLedgerId?: string;
+
+  @Column({ type: 'varchar', nullable: true })
   syslog?: string;
 
   @Column({ type: 'varchar', nullable: true })

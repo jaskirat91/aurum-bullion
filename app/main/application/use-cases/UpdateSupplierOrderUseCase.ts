@@ -26,17 +26,17 @@ export class UpdateSupplierOrderUseCase {
       const settings = await companySettingsRepo.findOne({ where: { id: 'current' } });
       if (!settings) throw new Error('Company settings not found.');
 
-      const defaultCashAccountId = settings.defaultCashLedgerId;
-      const defaultGoldAccountId = settings.defaultGoldLedgerId;
+      const defaultCashAccountId = settings.defaultContraCashLedgerId;
+      const defaultGoldAccountId = settings.defaultContraGoldLedgerId;
 
       // 1.1 Check Freeze Date for existing accounts at the OLD date
       if (sv) {
         const oldPartyAccount = await accountRepo.findOne({ where: { id: sv.accountId } });
         if (oldPartyAccount) Account.validateFreezeDate(oldPartyAccount, voucher.entryDate);
-        
+
         const oldCashAccount = await accountRepo.findOne({ where: { id: defaultCashAccountId } });
         if (oldCashAccount) Account.validateFreezeDate(oldCashAccount, voucher.entryDate);
-        
+
         const oldGoldAccount = await accountRepo.findOne({ where: { id: defaultGoldAccountId } });
         if (oldGoldAccount) Account.validateFreezeDate(oldGoldAccount, voucher.entryDate);
       }
@@ -89,7 +89,7 @@ export class UpdateSupplierOrderUseCase {
       // 6. Handle Ledger Entries (Wipe and Recreate)
       const jeRepo = em.getRepository(JournalEntry);
       const ledgerRepo = em.getRepository(LedgerEntry);
-      
+
       const existingJE = await jeRepo.findOne({ where: { voucherId: voucher.id } });
       if (existingJE) {
         await ledgerRepo.delete({ journalEntryId: existingJE.id });

@@ -36,7 +36,7 @@ import { AddOrderStatusToOrderVouchers1748000000000 } from './migrations/1748000
 
 export const AppDataSource = new DataSource({
   type: 'sqlite',
-  database: join(app.getPath('userData'), 'aurum_ledger.sqlite'),
+  database: join(app.getPath('userData'), 'aurum_bullion.sqlite'),
   /**
    * SQLCipher readiness:
    * When switching to better-sqlite3-with-cipher / typeorm-sqlcipher:

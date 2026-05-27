@@ -97,18 +97,21 @@ export class CreatePartyUseCase {
         const settings = await settingsRepo.findOne({ where: { id: 'current' } });
         if (!settings) throw new Error('Company settings not found');
 
-        const entryDate = new Date().toISOString().split('T')[0];
+        const entryDate = new Date();
+        entryDate.setDate(1);
+        entryDate.setMonth(3);
+        entryDate.setFullYear(Number(settings.financialYear.split('-')[0]));
         const narration = `Opening balance for ${dto.name}`;
         const voucher = new Voucher();
         voucher.type = VoucherType.JOURNAL;
         voucher.voucherNo = `OB-${dto.code}`;
-        voucher.entryDate = entryDate;
+        voucher.entryDate = entryDate.toISOString().split('T')[0];
         voucher.narration = narration;
         voucher.status = VoucherStatus.POSTED;
         const savedVoucher = await queryRunner.manager.save(voucher);
 
         const journalEntry = journalRepo.create({
-          entryDate,
+          entryDate: entryDate.toISOString().split('T')[0],
           voucherId: savedVoucher.id,
           narration,
           status: JournalEntryStatus.POSTED,
@@ -135,7 +138,7 @@ export class CreatePartyUseCase {
           await ledgerRepo.save(
             ledgerRepo.create({
               journalEntryId: jeId,
-              accountId: settings.defaultGoldLedgerId,
+              accountId: settings.defaultContraGoldLedgerId,
               debitGold: dto.openingGoldBalanceType === 'CR' ? dto.openingGoldBalance : 0,
               creditGold: dto.openingGoldBalanceType === 'DR' ? dto.openingGoldBalance : 0,
               debitAmount: 0,
@@ -164,7 +167,7 @@ export class CreatePartyUseCase {
           await ledgerRepo.save(
             ledgerRepo.create({
               journalEntryId: jeId,
-              accountId: settings.defaultCashLedgerId,
+              accountId: settings.defaultContraCashLedgerId,
               debitGold: 0,
               creditGold: 0,
               debitAmount: dto.openingAmountBalanceType === 'CR' ? dto.openingAmountBalance : 0,

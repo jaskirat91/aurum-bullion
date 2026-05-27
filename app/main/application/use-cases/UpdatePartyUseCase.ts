@@ -96,6 +96,9 @@ export class UpdatePartyUseCase {
         const ledgerRepo = queryRunner.manager.getRepository(LedgerEntry);
         const settingsRepo = queryRunner.manager.getRepository(CompanySetting);
 
+        const settings = await settingsRepo.findOne({ where: { id: 'current' } });
+        if (!settings) throw new Error('Company settings not found');
+
         const voucherNo = `OB-${party.code}`;
         let voucher = await voucherRepo.findOne({ where: { voucherNo } });
 
@@ -113,19 +116,23 @@ export class UpdatePartyUseCase {
             await journalRepo.save(newJE);
           }
         } else {
-          const entryDate = new Date().toISOString().split('T')[0];
+          const entryDate = new Date();
+          entryDate.setDate(1);
+          entryDate.setMonth(3);
+          entryDate.setFullYear(Number(settings.financialYear.split('-')[0]));
+
           const narration = `Opening balance for ${party.name}`;
           voucher = voucherRepo.create({
             type: VoucherType.JOURNAL,
             voucherNo,
-            entryDate,
+            entryDate: entryDate.toISOString().split('T')[0],
             narration,
             status: VoucherStatus.POSTED,
           });
           voucher = await voucherRepo.save(voucher);
 
           const journalEntry = journalRepo.create({
-            entryDate,
+            entryDate: entryDate.toISOString().split('T')[0],
             voucherId: voucher.id,
             narration,
             status: JournalEntryStatus.POSTED,
@@ -135,9 +142,6 @@ export class UpdatePartyUseCase {
 
         const je = await journalRepo.findOne({ where: { voucherId: voucher.id } });
         if (!je) throw new Error('Could not find or create Journal Entry for Opening Balance');
-
-        const settings = await settingsRepo.findOne({ where: { id: 'current' } });
-        if (!settings) throw new Error('Company settings not found');
 
         const hasGoldOB = party.opening_gold_balance > 0;
         const hasAmountOB = party.opening_amount_balance > 0;
@@ -158,7 +162,7 @@ export class UpdatePartyUseCase {
           await ledgerRepo.save(
             ledgerRepo.create({
               journalEntryId: je.id,
-              accountId: settings.defaultGoldLedgerId,
+              accountId: settings.defaultContraGoldLedgerId,
               debitGold: party.opening_gold_balance_type === 'CR' ? party.opening_gold_balance : 0,
               creditGold: party.opening_gold_balance_type === 'DR' ? party.opening_gold_balance : 0,
               debitAmount: 0,
@@ -186,7 +190,7 @@ export class UpdatePartyUseCase {
           await ledgerRepo.save(
             ledgerRepo.create({
               journalEntryId: je.id,
-              accountId: settings.defaultCashLedgerId,
+              accountId: settings.defaultContraCashLedgerId,
               debitGold: 0,
               creditGold: 0,
               debitAmount:

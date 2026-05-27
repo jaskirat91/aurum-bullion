@@ -36,8 +36,8 @@ export class CreateCustomerOrderUseCase {
       const settings = await companySettingsRepo.findOne({ where: { id: 'current' } });
       if (!settings) throw new Error('Company settings not found.');
 
-      const defaultCashAccountId = settings.defaultCashLedgerId;
-      const defaultGoldAccountId = settings.defaultGoldLedgerId;
+      const defaultCashAccountId = settings.defaultContraCashLedgerId;
+      const defaultGoldAccountId = settings.defaultContraGoldLedgerId;
 
       if (!defaultCashAccountId || !defaultGoldAccountId) {
         throw new Error('Default Cash or Gold accounts are not configured.');
