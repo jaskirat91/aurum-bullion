@@ -19,6 +19,7 @@ const HEADER_MAP = {
     'date',
     'txn date',
     'transaction date',
+    'transaction date (dd/mm/yyyy)',
     'value date',
     'value dt',
     'booking date',
@@ -54,8 +55,8 @@ const HEADER_MAP = {
     'deposit amt.',
     'deposit amount(inr)',
   ],
-  AMOUNT: ['amount', 'transaction amount', 'net amount'],
-  DRCR: ['dr/cr', 'type', 'transaction type', 'indicator', 'cr/dr'],
+  AMOUNT: ['amount', 'transaction amount', 'net amount', 'amount(inr)'],
+  DRCR: ['dr/cr', 'type', 'transaction type', 'indicator', 'cr/dr', 'debit/credit'],
   BALANCE: ['balance', 'running balance', 'closing balance', 'total', 'balance(inr)'],
   REF_NO: [
     'reference no',
@@ -199,6 +200,7 @@ export class BankStatementParser {
         const dr = this.parseFloatValue(this.getValue(row, mapping.DEBIT));
         const cr = this.parseFloatValue(this.getValue(row, mapping.CREDIT));
         const amount = this.parseFloatValue(this.getValue(row, mapping.AMOUNT));
+        const drcr = this.getValue(row, mapping.DRCR);
 
         // Skip rows without at least a date and some amount
         if (!rawDate) return null;
@@ -217,8 +219,13 @@ export class BankStatementParser {
 
         // Ensure amount logic
         if (amount !== undefined && amount != 0) {
-          normalized.amount = Math.abs(amount);
-          normalized.type = amount < 0 ? 'DR' : 'CR';
+          if (drcr) {
+            normalized.amount = Number(amount);
+            normalized.type = drcr?.toLowerCase() === 'dr' ? 'DR' : 'CR';
+          } else {
+            normalized.amount = Math.abs(amount);
+            normalized.type = amount < 0 ? 'DR' : 'CR';
+          }
         } else if (dr !== undefined && dr != 0) {
           normalized.amount = dr;
           normalized.type = 'DR';
