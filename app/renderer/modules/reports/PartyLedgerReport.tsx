@@ -191,9 +191,9 @@ export function PartyLedgerReport({ active }: { active: boolean }) {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right font-mono font-bold text-emerald-500">{row.debitGold.toFixed(3)}g</td>
-                    <td className="px-6 py-4 text-right font-mono font-bold text-emerald-600">₹{row.debitAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                    <td className="px-6 py-4 text-right font-mono font-bold text-emerald-600">₹{row.debitAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                     <td className="px-6 py-4 text-right font-mono font-bold text-red-500">{row.creditGold.toFixed(3)}g</td>
-                    <td className="px-6 py-4 text-right font-mono font-bold text-red-600">₹{row.creditAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                    <td className="px-6 py-4 text-right font-mono font-bold text-red-600">₹{row.creditAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                   </tr>
                 ))
               )}
@@ -203,9 +203,9 @@ export function PartyLedgerReport({ active }: { active: boolean }) {
               <tr>
                 <td colSpan={2} className="px-6 py-4 font-black uppercase text-xs tracking-widest text-primary">Grand Totals</td>
                 <td className="px-6 py-4 text-right font-mono font-black text-emerald-500 text-base">{totals.debitGold.toFixed(3)}g</td>
-                <td className="px-6 py-4 text-right font-mono font-black text-emerald-600 text-base">₹{totals.debitAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                <td className="px-6 py-4 text-right font-mono font-black text-emerald-600 text-base">₹{totals.debitAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                 <td className="px-6 py-4 text-right font-mono font-black text-red-500 text-base">{totals.creditGold.toFixed(3)}g</td>
-                <td className="px-6 py-4 text-right font-mono font-black text-red-600 text-base">₹{totals.creditAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                <td className="px-6 py-4 text-right font-mono font-black text-red-600 text-base">₹{totals.creditAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
               </tr>
             </tfoot>
           </table>

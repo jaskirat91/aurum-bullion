@@ -287,7 +287,7 @@ export function OldItemDialog({ isOpen, onClose, onSave, initialData }: OldItemD
                   <IndianRupee size={10} /> Labour Amount
                 </label>
                 <div className="px-3 py-2 bg-background/50 border border-border/50 rounded-xl">
-                  <span className="text-sm font-black text-emerald-500">₹{labourAmount.toLocaleString()}</span>
+                  <span className="text-sm font-black text-emerald-500">₹{labourAmount.toLocaleString('en-IN')}</span>
                 </div>
               </div>
             </div>

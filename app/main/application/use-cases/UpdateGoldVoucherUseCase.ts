@@ -8,13 +8,16 @@ import { Account } from '../../domain/entities/Account';
 import { CreateGoldVoucherDTO } from './CreateGoldVoucherUseCase';
 
 export class UpdateGoldVoucherUseCase {
-  async execute(voucherId: string, dto: CreateGoldVoucherDTO): Promise<{ success: boolean; voucherNo: string }> {
+  async execute(
+    voucherId: string,
+    dto: CreateGoldVoucherDTO,
+  ): Promise<{ success: boolean; voucherNo: string }> {
     return AppDataSource.transaction(async (em) => {
       // 1. Validate the existing voucher
       const voucherRepo = em.getRepository(Voucher);
       const voucher = await voucherRepo.findOne({ where: { id: voucherId } });
       if (!voucher) throw new Error('Voucher not found.');
-      
+
       const gvRepo = em.getRepository(GoldVoucher);
       const accountRepo = em.getRepository(Account);
 
@@ -24,8 +27,8 @@ export class UpdateGoldVoucherUseCase {
         const oldPartyAccount = await accountRepo.findOne({ where: { id: oldGv.partyAccountId } });
         if (oldPartyAccount) Account.validateFreezeDate(oldPartyAccount, voucher.entryDate);
       }
-      
-      // If the user wants to edit, we should probably allow even if POSTED, 
+
+      // If the user wants to edit, we should probably allow even if POSTED,
       // but we need to handle the ledger entries accordingly.
       // For now, let's allow editing but we will replace the JournalEntry if it exists.
 
@@ -50,16 +53,16 @@ export class UpdateGoldVoucherUseCase {
         const iGold = dto.issueGold || 0;
         const rAmt = dto.receiptAmount || 0;
         const iAmt = dto.issueAmount || 0;
-        
+
         const parts: string[] = [];
         if (rGold > 0 || rAmt > 0) {
           const g = rGold > 0 ? `${rGold.toFixed(3)}g gold` : '';
-          const a = rAmt > 0 ? `₹${rAmt.toLocaleString()}` : '';
+          const a = rAmt > 0 ? `₹${rAmt.toLocaleString('en-IN')}` : '';
           parts.push(`Received from ${partyAccount.name}: ${g}${g && a ? ' and ' : ''}${a}`);
         }
         if (iGold > 0 || iAmt > 0) {
           const g = iGold > 0 ? `${iGold.toFixed(3)}g gold` : '';
-          const a = iAmt > 0 ? `₹${iAmt.toLocaleString()}` : '';
+          const a = iAmt > 0 ? `₹${iAmt.toLocaleString('en-IN')}` : '';
           parts.push(`Issued to ${partyAccount.name}: ${g}${g && a ? ' and ' : ''}${a}`);
         }
         finalNarration = parts.join('. ') || `Gold Voucher - ${voucher.voucherNo}`;
@@ -83,7 +86,7 @@ export class UpdateGoldVoucherUseCase {
       const oldDate = new Date(voucher.entryDate).toISOString().split('T')[0];
       const newDate = new Date(dto.entryDate).toISOString().split('T')[0];
 
-      const hasValuesChanged = 
+      const hasValuesChanged =
         oldReceiptGold !== newReceiptGold ||
         oldIssueGold !== newIssueGold ||
         oldReceiptAmount !== newReceiptAmount ||
@@ -110,10 +113,10 @@ export class UpdateGoldVoucherUseCase {
       // 8. Handle Ledger Entries (Wipe and Recreate to ensure integrity)
       const jeRepo = em.getRepository(JournalEntry);
       const ledgerRepo = em.getRepository(LedgerEntry);
-      
+
       // Find any existing Journal Entry for this voucher
       const existingJE = await jeRepo.findOne({ where: { voucherId: voucher.id } });
-      
+
       if (existingJE) {
         // Delete all ledger entries first
         await ledgerRepo.delete({ journalEntryId: existingJE.id });
@@ -136,7 +139,7 @@ export class UpdateGoldVoucherUseCase {
         // Gold Entries
         if ((dto.receiptGold || 0) > 0 || (dto.issueGold || 0) > 0) {
           const goldLedgerId = settings.defaultGoldLedgerId;
-          
+
           const partyGoldEntry = new LedgerEntry();
           partyGoldEntry.accountId = partyAccount.id;
           partyGoldEntry.debitGold = dto.issueGold || 0;

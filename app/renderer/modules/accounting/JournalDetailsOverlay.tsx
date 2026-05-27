@@ -277,7 +277,7 @@ export function JournalDetailsOverlay({ journalId, onClose, onEdit, onCancelled 
                                {(le.debitAmount > 0 || le.debitGold > 0) ? (
                                   <div className="space-y-0.5">
                                      {le.debitAmount > 0 && (
-                                        <p className="font-mono text-sm font-black text-primary">₹{Number(le.debitAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                                        <p className="font-mono text-sm font-black text-primary">₹{Number(le.debitAmount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
                                      )}
                                      {le.debitGold > 0 && (
                                         <p className="font-mono text-[9px] font-bold text-amber-500">{Number(le.debitGold).toFixed(3)}g</p>
@@ -291,7 +291,7 @@ export function JournalDetailsOverlay({ journalId, onClose, onEdit, onCancelled 
                                {(le.creditAmount > 0 || le.creditGold > 0) ? (
                                   <div className="space-y-0.5">
                                      {le.creditAmount > 0 && (
-                                        <p className="font-mono text-sm font-black text-danger">₹{Number(le.creditAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                                        <p className="font-mono text-sm font-black text-danger">₹{Number(le.creditAmount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
                                      )}
                                      {le.creditGold > 0 && (
                                         <p className="font-mono text-[9px] font-bold text-rose-400">{Number(le.creditGold).toFixed(3)}g</p>
@@ -314,13 +314,13 @@ export function JournalDetailsOverlay({ journalId, onClose, onEdit, onCancelled 
                          <td className="px-5 py-4 font-black text-[9px] uppercase tracking-[0.1em] text-text">Total Distribution</td>
                          <td className="px-5 py-4 text-right">
                             <div className="space-y-0.5">
-                               <p className="font-mono text-base font-black text-primary">₹{totalDebitINR.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                               <p className="font-mono text-base font-black text-primary">₹{totalDebitINR.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
                                {totalDebitGram > 0 && <p className="font-mono text-[9px] font-black text-amber-500 uppercase">{totalDebitGram.toFixed(3)}g</p>}
                             </div>
                          </td>
                          <td className="px-5 py-4 text-right">
                             <div className="space-y-0.5">
-                               <p className="font-mono text-base font-black text-danger">₹{totalCreditINR.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                               <p className="font-mono text-base font-black text-danger">₹{totalCreditINR.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
                                {totalCreditGram > 0 && <p className="font-mono text-[9px] font-black text-rose-400 uppercase">{totalCreditGram.toFixed(3)}g</p>}
                             </div>
                          </td>

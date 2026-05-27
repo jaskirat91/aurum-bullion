@@ -143,12 +143,12 @@ export function GoldVoucherDetailsOverlay({ voucherId, onClose, onEdit }: GoldVo
                  {/* Amount Cards */}
                  <div className="bg-emerald-50/50 p-6 rounded-[2rem] border border-emerald-100 flex flex-col items-center justify-center">
                    <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600 mb-1">Amount Received</span>
-                   <span className="text-3xl font-black text-emerald-600">₹ {Number(receiptAmount || 0).toLocaleString()}</span>
+                   <span className="text-3xl font-black text-emerald-600">₹ {Number(receiptAmount || 0).toLocaleString('en-IN')}</span>
                  </div>
 
                  <div className="bg-primary/5 p-6 rounded-[2rem] border border-primary/10 flex flex-col items-center justify-center">
                    <span className="text-[9px] font-black uppercase tracking-widest text-primary mb-1">Amount Issued</span>
-                   <span className="text-3xl font-black text-primary">₹ {Number(issueAmount || 0).toLocaleString()}</span>
+                   <span className="text-3xl font-black text-primary">₹ {Number(issueAmount || 0).toLocaleString('en-IN')}</span>
                  </div>
                </div>
             </div>
@@ -169,11 +169,11 @@ export function GoldVoucherDetailsOverlay({ voucherId, onClose, onEdit }: GoldVo
             <div className="flex items-center justify-between px-2 opacity-50">
                <div className="flex items-center gap-2">
                  <Clock size={12} />
-                 <span className="text-[9px] font-bold uppercase tracking-tighter">Created: {new Date(voucher.createdAt).toLocaleString()}</span>
+                 <span className="text-[9px] font-bold uppercase tracking-tighter">Created: {new Date(voucher.createdAt).toLocaleString('en-IN')}</span>
                </div>
                <div className="flex items-center gap-2">
                  <Clock size={12} />
-                 <span className="text-[9px] font-bold uppercase tracking-tighter">Updated: {new Date(voucher.updatedAt).toLocaleString()}</span>
+                 <span className="text-[9px] font-bold uppercase tracking-tighter">Updated: {new Date(voucher.updatedAt).toLocaleString('en-IN')}</span>
                </div>
             </div>
           </div>

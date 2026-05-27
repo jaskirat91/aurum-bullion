@@ -391,7 +391,7 @@ export function PartyManager() {
                   </td>
                   <td className="p-5 text-right font-black">
                      <span className={`${party.opening_amount_balance > 0 ? party.opening_amount_balance_type === 'CR' ? 'text-red-500' : 'text-emerald-500' : 'text-text-muted'}`}>
-                      ₹{party.opening_amount_balance.toLocaleString()}
+                      ₹{party.opening_amount_balance.toLocaleString('en-IN')}
                       <span className="text-[10px] ml-1 opacity-50 uppercase">{party.opening_amount_balance_type}</span>
                     </span>
                   </td>

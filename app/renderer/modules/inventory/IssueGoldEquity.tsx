@@ -272,7 +272,7 @@ export function IssueGoldEquity({ active }: { active?: boolean }) {
               </div>
               <div className="bg-emerald-500/5 p-6 rounded-3xl border-2 border-emerald-500/20 flex flex-col items-center justify-center">
                 <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Equity to {isIssue ? 'Issue' : 'Receive'}</span>
-                <span className="text-3xl font-black text-emerald-600">₹ {(parseFloat(form.equityAmount.toString()) || 0).toLocaleString()}</span>
+                <span className="text-3xl font-black text-emerald-600">₹ {(parseFloat(form.equityAmount.toString()) || 0).toLocaleString('en-IN')}</span>
               </div>
             </div>
           </div>
@@ -321,7 +321,7 @@ export function IssueGoldEquity({ active }: { active?: boolean }) {
             </div>
             <h3 className="text-2xl font-black tracking-tight mb-2">Confirm {isIssue ? 'Issuance' : 'Receipt'}</h3>
             <p className="text-text-muted font-bold mb-8 leading-relaxed">
-              Are you sure you want to {isIssue ? 'issue' : 'receive'} <span className={`${isIssue ? 'text-primary' : 'text-emerald-600'} font-black`}>{(parseFloat(form.pureGoldWeight.toString()) || 0).toFixed(3)}g Gold</span> and <span className="text-emerald-600 font-black">₹ {(parseFloat(form.equityAmount.toString()) || 0).toLocaleString()} Cash</span> {isIssue ? 'to' : 'from'} <span className={`${isIssue ? 'text-primary' : 'text-emerald-600'} font-black`}>{form.partyName}</span>?
+              Are you sure you want to {isIssue ? 'issue' : 'receive'} <span className={`${isIssue ? 'text-primary' : 'text-emerald-600'} font-black`}>{(parseFloat(form.pureGoldWeight.toString()) || 0).toFixed(3)}g Gold</span> and <span className="text-emerald-600 font-black">₹ {(parseFloat(form.equityAmount.toString()) || 0).toLocaleString('en-IN')} Cash</span> {isIssue ? 'to' : 'from'} <span className={`${isIssue ? 'text-primary' : 'text-emerald-600'} font-black`}>{form.partyName}</span>?
             </p>
             <div 
               className="flex gap-4"

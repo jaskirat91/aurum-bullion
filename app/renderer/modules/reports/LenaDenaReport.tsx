@@ -111,7 +111,7 @@ export function LenaDenaReport({ active }: { active: boolean }) {
 
   const formatAmount = (val: number) => {
     if (!val || val === 0) return '';
-    return val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   const formatWeight = (val: number) => {

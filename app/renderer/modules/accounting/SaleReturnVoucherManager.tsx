@@ -249,7 +249,7 @@ export function SaleReturnVoucherManager() {
                     </p>
                   </td>
                   <td className="border px-3 py-2 font-black text-right text-text/80">{row.totalGoldWeight?.toFixed(3)} g</td>
-                  <td className="border px-3 py-2 font-black text-right text-text/80">₹ {row.totalAmount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                  <td className="border px-3 py-2 font-black text-right text-text/80">₹ {row.totalAmount?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                   <td className="border px-3 py-2"><StatusChip status={row.voucher?.status as StatusType} /></td>
                   <td className="border px-3 py-2">
                     <div className="flex items-center justify-center gap-1">

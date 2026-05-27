@@ -122,7 +122,7 @@ export function SaleVoucherDetailsOverlay({ voucherId, onClose, onEdit }: Detail
                   </div>
                   <div className="bg-emerald-500/5 border border-emerald-500/15 rounded-2xl p-4">
                     <div className="text-[9px] font-black uppercase text-emerald-600/70 tracking-widest">Total Amount</div>
-                    <div className="text-xl font-black text-emerald-500 mt-0.5">₹ {totalAmount.toLocaleString()}</div>
+                    <div className="text-xl font-black text-emerald-500 mt-0.5">₹ {totalAmount.toLocaleString('en-IN')}</div>
                   </div>
                 </div>
               )}
@@ -167,7 +167,7 @@ export function SaleVoucherDetailsOverlay({ voucherId, onClose, onEdit }: Detail
                           <td className="px-4 py-3 font-bold text-right">{item.purityPercentage.toFixed(3)}%</td>
                           <td className="px-4 py-3 font-black text-primary text-right">{item.goldWeight.toFixed(3)}</td>
                           <td className="px-4 py-3 font-bold text-right">{item.labourPercentage.toFixed(2)}%</td>
-                          <td className="px-4 py-3 font-black text-emerald-500 text-right">₹ {item.labourAmount.toLocaleString()}</td>
+                          <td className="px-4 py-3 font-black text-emerald-500 text-right">₹ {item.labourAmount.toLocaleString('en-IN')}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -177,7 +177,7 @@ export function SaleVoucherDetailsOverlay({ voucherId, onClose, onEdit }: Detail
                           <td colSpan={4} className="px-4 py-2.5 text-[12px] font-black uppercase text-text-muted tracking-widest text-left">Totals</td>
                           <td className="px-4 py-2.5 text-[12px] font-black text-primary text-right">{totalGold.toFixed(3)}</td>
                           <td />
-                          <td className="px-4 py-2.5 text-[12px] font-black text-emerald-500 text-right">₹ {totalAmount.toLocaleString()}</td>
+                          <td className="px-4 py-2.5 text-[12px] font-black text-emerald-500 text-right">₹ {totalAmount.toLocaleString('en-IN')}</td>
                         </tr>
                       </tfoot>
                     )}

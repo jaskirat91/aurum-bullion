@@ -310,7 +310,7 @@ export function CashVoucherManager() {
                   </td>
                   <td className="border px-3 py-2"><StatusChip status={row.voucher?.status as StatusType} /></td>
                   <td className="border px-3 py-2 font-bold text-right text-text/80">
-                    ₹ {(row.voucher?.type === 'RECEIPT' ? row.receiptAmount : row.paymentAmount)?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    ₹ {(row.voucher?.type === 'RECEIPT' ? row.receiptAmount : row.paymentAmount)?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </td>
                   <td className="border px-3 py-2 font-bold text-right">
                     {row.goldWeight ? row.goldWeight.toFixed(3) + "g" : '—'}

@@ -178,7 +178,7 @@ export function LineItemDialog({ isOpen, onClose, onSave, initialData, status, c
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-black text-text truncate">{product.tag} — {product.finishedItem?.name}</div>
                       <div className="text-[9px] font-bold text-text-muted mt-0.5">
-                        Net Wt: {Number(product.tagNetWeight).toFixed(3)}g &nbsp;|&nbsp; Tag Amt: ₹{Number(product.tagAmount).toLocaleString()}
+                        Net Wt: {Number(product.tagNetWeight).toFixed(3)}g &nbsp;|&nbsp; Tag Amt: ₹{Number(product.tagAmount).toLocaleString('en-IN')}
                       </div>
                     </div>
                     <button
@@ -253,7 +253,7 @@ export function LineItemDialog({ isOpen, onClose, onSave, initialData, status, c
                         <IndianRupee size={10} /> Labour Amount
                       </label>
                       <div className="px-3 py-2 bg-background/50 border border-border/50 rounded-xl">
-                        <span className="text-sm font-black text-emerald-500">₹{labourAmount.toLocaleString()}</span>
+                        <span className="text-sm font-black text-emerald-500">₹{labourAmount.toLocaleString('en-IN')}</span>
                       </div>
                     </div>
                   </div>

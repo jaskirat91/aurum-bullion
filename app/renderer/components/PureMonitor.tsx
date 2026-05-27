@@ -112,7 +112,7 @@ export function PureMonitor({ partyId, partyName, balances }: PureMonitorProps) 
                 <div className="flex justify-between items-end border-b border-emerald-500/10 pb-2">
                   <span className="text-[9px] font-bold text-text-muted/60 uppercase">Opening</span>
                   <div className="flex items-center gap-1.5">
-                    <span className="font-black text-xs">₹ {(balances?.cash?.opening || 0).toLocaleString()}</span>
+                    <span className="font-black text-xs">₹ {(balances?.cash?.opening || 0).toLocaleString('en-IN')}</span>
                     <span className={`text-[9px] font-black uppercase px-1 py-0.5 rounded-sm ${balances?.cash?.openingType === 'CR' ? 'text-danger' : 'text-emerald-500'}`}>
                       {balances?.cash?.openingType}
                     </span>
@@ -123,7 +123,7 @@ export function PureMonitor({ partyId, partyName, balances }: PureMonitorProps) 
                   <span className="text-[9px] font-bold text-text-muted/60 uppercase">Payments (+)</span>
                   <div className="flex items-center gap-1.5">
                     <span className={`font-black text-xs ${(balances?.cash?.credits || 0) > 0 ? 'text-danger' : 'text-emerald-500'}`}>
-                      <TrendingUp size={10} className="inline mr-1" /> ₹ {(balances?.cash?.credits || 0).toLocaleString()}
+                      <TrendingUp size={10} className="inline mr-1" /> ₹ {(balances?.cash?.credits || 0).toLocaleString('en-IN')}
                     </span>
                     <span className="text-[9px] font-black uppercase px-1 pt-1 rounded-sm text-danger">CR</span>
                   </div>
@@ -133,7 +133,7 @@ export function PureMonitor({ partyId, partyName, balances }: PureMonitorProps) 
                   <span className="text-[9px] font-bold text-text-muted/60 uppercase">Issuance (-)</span>
                   <div className="flex items-center gap-1.5">
                     <span className={`font-black text-xs ${(balances?.cash?.debits || 0) > 0 ? 'text-emerald-500' : 'text-text-muted'}`}>
-                      <TrendingDown size={10} className="inline mr-1" /> ₹ {(balances?.cash?.debits || 0).toLocaleString()}
+                      <TrendingDown size={10} className="inline mr-1" /> ₹ {(balances?.cash?.debits || 0).toLocaleString('en-IN')}
                     </span>
                     <span className="text-[9px] font-black uppercase px-1 pt-1 rounded-sm text-emerald-500">DR</span>
                   </div>
@@ -142,7 +142,7 @@ export function PureMonitor({ partyId, partyName, balances }: PureMonitorProps) 
                 <div className="pt-2 border-t border-emerald-500/10 text-center">
                   <span className="text-[8px] font-black text-emerald-600/60 uppercase tracking-widest block mb-1">Net Balance</span>
                   <div className={`flex items-center justify-center gap-1 text-lg font-black tracking-tight ${(balances?.cash?.net || 0) > 0 ? 'text-danger' : 'text-emerald-500'}`}>
-                    ₹ {Math.abs(balances?.cash?.net || 0).toLocaleString()}
+                    ₹ {Math.abs(balances?.cash?.net || 0).toLocaleString('en-IN')}
                     <span className={`text-[8px] font-black px-1.5 py-0.5 rounded ${ (balances?.cash?.net || 0) > 0 ? 'bg-danger/10 text-danger' : 'bg-emerald-500/10 text-emerald-500'}`}>
                       {(balances?.cash?.net || 0) > 0 ? 'CR' : (balances?.cash?.net || 0) === 0 ? 'Clear' : 'DR'}
                     </span>

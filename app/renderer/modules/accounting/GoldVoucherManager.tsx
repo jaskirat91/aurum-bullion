@@ -267,7 +267,7 @@ export function GoldVoucherManager() {
                   </td>
                   <td className="border px-3 py-2"><StatusChip status={item.voucher.status} /></td>
                   <td className={`border px-3 py-2 font-black text-right ${!isIssue ? 'text-emerald-600' : 'text-primary'}`}>
-                    {displayCash > 0 ? displayCash.toLocaleString() : '—'}
+                    {displayCash > 0 ? displayCash.toLocaleString('en-IN') : '—'}
                   </td>
                   <td className={`border px-3 py-2 font-black text-right ${!isIssue ? 'text-emerald-600' : 'text-primary'}`}>
                     {displayGold > 0 ? Number(displayGold).toFixed(3) : '—'}

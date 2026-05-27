@@ -116,7 +116,7 @@ export function JournalManager() {
         csv(j.voucher.voucherNo),
         csv(j.entryDate),
             csv(j.status),
-            csv(new Date(j.createdAt).toLocaleString()),
+            csv(new Date(j.createdAt).toLocaleString('en-IN')),
         csv(j.narration),
             csv(j.sourceReference),
             csv(le.account?.name),

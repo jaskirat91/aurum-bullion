@@ -286,7 +286,7 @@ export function FinishedStock({ active }: { active?: boolean }) {
                   <th className="border p-2 text-right text-primary">{data.totals.mottiWeight.toFixed(3)}g</th>
                   <th className="border p-2 text-right text-primary">{data.totals.stoneWeight.toFixed(3)}g</th>
                   <th className="border p-2 text-right text-primary">{data.totals.netWeight.toFixed(3)}g</th>
-                  <th className="border p-2 text-right text-primary">{data.totals.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</th>
+                  <th className="border p-2 text-right text-primary">{data.totals.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</th>
                   <th className="border p-2" colSpan={2}></th>
                 </tr>
               )}
@@ -521,7 +521,7 @@ export function FinishedStock({ active }: { active?: boolean }) {
                           <div className="flex justify-between items-center text-[10px]">
                              <span className="font-extrabold text-text-muted uppercase">Audit Date</span>
                              <span className="font-black font-mono">
-                                {new Date(viewProduct.createdAt).toLocaleString()}
+                                {new Date(viewProduct.createdAt).toLocaleString('en-IN')}
                              </span>
                           </div>
                        </div>
@@ -561,7 +561,7 @@ export function FinishedStock({ active }: { active?: boolean }) {
                              <TinyStat label="Tag Stone" value={viewProduct.tagStoneWeight} />
                              <div className="col-span-2 p-2 bg-emerald-500/10 rounded-lg flex flex-col justify-center">
                                 <span className="text-[7px] font-black text-emerald-600 uppercase mb-0.5">Final Tag Amount</span>
-                                <span className="text-sm font-black text-emerald-600 font-mono">₹ {viewProduct.tagAmount.toLocaleString()}</span>
+                                <span className="text-sm font-black text-emerald-600 font-mono">₹ {viewProduct.tagAmount.toLocaleString('en-IN')}</span>
                              </div>
                           </div>
                        </div>
@@ -1001,7 +1001,7 @@ function DetailCard({ icon, label, value, unit = '', color = 'text-text', prefix
         <span className="text-[8px] font-black uppercase tracking-wider">{label}</span>
       </div>
       <div className={`text-sm font-black truncate font-mono ${color}`}>
-        {isText ? value : `${prefix ? unit + ' ' : ''}${typeof value === 'number' ? value.toLocaleString(undefined, { minimumFractionDigits: unit === 'g' || label === 'Net Weight' || label === 'Gross Weight' ? 3 : 2 }) : value}${!prefix ? unit : ''}`}
+        {isText ? value : `${prefix ? unit + ' ' : ''}${typeof value === 'number' ? value.toLocaleString('en-IN', { minimumFractionDigits: unit === 'g' || label === 'Net Weight' || label === 'Gross Weight' ? 3 : 2 }) : value}${!prefix ? unit : ''}`}
       </div>
     </div>
   );
@@ -1013,7 +1013,7 @@ function TinyStat({ label, value, highlight = false, isInt = false, isPercent = 
        <span className="text-[7px] font-black uppercase mb-0.5 opacity-50">{label}</span>
        <span className={`text-[11px] font-black font-mono leading-none ${highlight ? 'text-primary' : 'text-text'}`}>
           {prefix && unit}
-          {isInt ? value : value.toLocaleString(undefined, { minimumFractionDigits: isPercent ? 2 : 3 })}
+          {isInt ? value : value.toLocaleString('en-IN', { minimumFractionDigits: isPercent ? 2 : 3 })}
           {isPercent ? '%' : !prefix ? unit : ''}
        </span>
     </div>

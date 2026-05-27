@@ -305,13 +305,13 @@ export function CustomerPurchaseLedger({ active }: { active: boolean }) {
                       <td className="px-4 py-3 text-right font-bold border">{Number(row.tagMottiWeight).toFixed(3)}</td>
                       <td className="px-4 py-3 text-right font-bold border">{Number(row.piroiWeight).toFixed(3)}</td>
                       <td className="px-4 py-3 text-right font-bold border">{Number(row.tagNetWeight).toFixed(3)}</td>
-                      <td className="px-4 py-3 text-right font-bold border">₹{Number(row.tagAmount).toLocaleString()}</td>
+                      <td className="px-4 py-3 text-right font-bold border">₹{Number(row.tagAmount).toLocaleString('en-IN')}</td>
                       <td className="px-4 py-3 text-right font-bold border">{Number(row.soldGoldPercentage)}%</td>
                       <td className="px-4 py-3 text-right font-bold border">{Number(row.soldAmountPercentage)}%</td>
                       <td className="px-4 py-3 text-right font-bold border">{drGold.toFixed(3)}</td>
-                      <td className="px-4 py-3 text-right font-bold border">{drAmount.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-right font-bold border">{drAmount.toLocaleString('en-IN')}</td>
                       <td className="px-4 py-3 text-right font-bold border">{crGold.toFixed(3)}</td>
-                      <td className="px-4 py-3 text-right font-bold border">{crAmount.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-right font-bold border">{crAmount.toLocaleString('en-IN')}</td>
                     </tr>
                   );
                 })

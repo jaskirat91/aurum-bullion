@@ -283,7 +283,7 @@ function BatchDetailsOverlay({ batch, onClose }: { batch: Batch; onClose: () => 
                          {batch.status}
                       </span>
                       <span className="text-[10px] font-bold text-text-muted opacity-50 flex items-center gap-1">
-                         <Clock size={10} /> Created: {new Date(batch.createdAt).toLocaleString()}
+                         <Clock size={10} /> Created: {new Date(batch.createdAt).toLocaleString('en-IN')}
                       </span>
                    </div>
                 </div>
@@ -354,7 +354,7 @@ function BatchDetailsOverlay({ batch, onClose }: { batch: Batch; onClose: () => 
                                            tx.type === 'ISSUE_TO_KARIGAR' ? 'text-amber-500' :
                                            'text-blue-500'
                                         }`}>{tx.type.replace(/_/g, ' ')}</span>
-                                        <span className="text-xs font-bold text-text-muted opacity-60">{new Date(tx.createdAt).toLocaleString()}</span>
+                                        <span className="text-xs font-bold text-text-muted opacity-60">{new Date(tx.createdAt).toLocaleString('en-IN')}</span>
                                      </div>
                                      <div className="text-right">
                                         <div className="text-[10px] font-black uppercase tracking-widest text-text-muted">Party</div>

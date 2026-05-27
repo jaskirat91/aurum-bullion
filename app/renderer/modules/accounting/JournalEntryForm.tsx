@@ -454,16 +454,16 @@ export function JournalEntryForm({ onCancel, onSuccess, editJournalId, initialDa
                      <div className="grid grid-cols-2 gap-2">
                         <div>
                            <label className="text-[8px] text-text-muted font-bold block">TOTAL DR</label>
-                           <span className="text-sm font-black text-primary">{totals.debitINR.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                           <span className="text-sm font-black text-primary">{totals.debitINR.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                         </div>
                         <div className="text-right">
                            <label className="text-[8px] text-text-muted font-bold block">TOTAL CR</label>
-                           <span className="text-sm font-black text-danger">{totals.creditINR.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                           <span className="text-sm font-black text-danger">{totals.creditINR.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                         </div>
                      </div>
                      {!isBalancedINR && (
                         <div className="mt-2 pt-2 border-t border-danger/10 text-[9px] font-bold text-danger text-center">
-                           DIFF: ₹{Math.abs(totals.debitINR - totals.creditINR).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                           DIFF: ₹{Math.abs(totals.debitINR - totals.creditINR).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                         </div>
                      )}
                   </div>

@@ -385,13 +385,13 @@ export function AccountStatement({ active }: { active: boolean }) {
                       )} */}
                       
                       <td className={`border border-border border-slate-300 dark:border-slate-700 print:border-black px-2 py-1.5 text-right font-mono font-bold whitespace-nowrap ${isFrozen ? 'text-blue-600 print:text-blue-600' : 'print:text-black'}`}>
-                        {row.DrAmt ? row.DrAmt.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '-'}
+                        {row.DrAmt ? row.DrAmt.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '-'}
                       </td>
                       <td className={`border border-border border-slate-300 dark:border-slate-700 print:border-black px-2 py-1.5 text-right font-mono font-bold whitespace-nowrap ${isFrozen ? 'text-blue-600 print:text-blue-600' : 'print:text-black'}`}>
-                        {row.CrAmt ? row.CrAmt.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '-'}
+                        {row.CrAmt ? row.CrAmt.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '-'}
                       </td>
                       <td className={`border border-border border-slate-300 dark:border-slate-700 print:border-black px-2 py-1.5 text-right font-mono font-black bg-primary/5 print:bg-transparent whitespace-nowrap text-[14px] ${isFrozen ? 'text-blue-600' : (row.RunningAmt >= 0 ? 'text-emerald-700' : 'text-red-700')}`}>
-                        {Math.abs(row.RunningAmt).toLocaleString(undefined, { minimumFractionDigits: 2 })} {row.RunningAmt >= 0 ? 'Dr' : 'Cr'}
+                        {Math.abs(row.RunningAmt).toLocaleString('en-IN', { minimumFractionDigits: 2 })} {row.RunningAmt >= 0 ? 'Dr' : 'Cr'}
                       </td>
 
                       <td className={`border border-border border-slate-300 dark:border-slate-700 print:border-black px-1 py-1.5 text-right font-mono font-bold whitespace-nowrap ${isFrozen ? 'text-blue-600 print:text-blue-600' : 'print:text-black'}`}>

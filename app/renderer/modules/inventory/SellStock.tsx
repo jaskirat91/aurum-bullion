@@ -206,7 +206,7 @@ export function SellStock({ active }: { active?: boolean }) {
                  <div className="col-span-2 p-3 bg-emerald-500/5 rounded-xl border border-emerald-500/10 flex justify-between items-center">
                     <div>
                       <span className="text-[8px] font-black text-emerald-600 uppercase block leading-none">Tag Amount</span>
-                      <span className="text-lg font-black text-emerald-600 leading-tight">₹ {form.tagAmount.toLocaleString()}</span>
+                      <span className="text-lg font-black text-emerald-600 leading-tight">₹ {form.tagAmount.toLocaleString('en-IN')}</span>
                     </div>
                     <div className="text-right text-[10px] font-bold text-text-muted uppercase leading-tight">
                       K: {form.kundanWeight}g | S: {form.stoneWeight}g | M: {form.mottiWeight}g
@@ -294,7 +294,7 @@ export function SellStock({ active }: { active?: boolean }) {
                 <div className="flex justify-between items-center group">
                    <div className="flex flex-col">
                       <span className="text-[8px] font-black text-text-muted uppercase tracking-widest leading-none mb-1">Charge INR</span>
-                      <span className="text-xl font-black text-emerald-500 tracking-tighter leading-none">₹ {inrToCharge.toLocaleString()}</span>
+                      <span className="text-xl font-black text-emerald-500 tracking-tighter leading-none">₹ {inrToCharge.toLocaleString('en-IN')}</span>
                    </div>
                    <ArrowRightCircle className="text-emerald-500/20" size={20} />
                 </div>

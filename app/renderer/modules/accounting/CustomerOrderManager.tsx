@@ -287,7 +287,7 @@ export function CustomerOrderManager() {
                   </td>
                   <td className="border px-3 py-2"><StatusChip status={row.orderStatus as StatusType} /></td>
                   <td className="border px-3 py-2 font-bold text-right text-text/80">
-                    ₹ {(row.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    ₹ {(row.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </td>
                   <td className="border px-3 py-2 font-bold text-right">
                     {row.goldWeight ? row.goldWeight.toFixed(3) + "g" : '—'}

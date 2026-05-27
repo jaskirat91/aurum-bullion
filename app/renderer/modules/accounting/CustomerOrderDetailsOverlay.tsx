@@ -128,7 +128,7 @@ export function CustomerOrderDetailsOverlay({ voucherId, onClose, onEdit, onCanc
                       <IndianRupee size={10} /> Amount
                     </div>
                     <div className="text-2xl font-black text-emerald-500 mt-1">
-                      ₹ {Number(details.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      ₹ {Number(details.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </div>
                   </div>
                   <IndianRupee size={32} className="text-emerald-500/10" />
@@ -152,7 +152,7 @@ export function CustomerOrderDetailsOverlay({ voucherId, onClose, onEdit, onCanc
                         <TrendingUp size={10} /> Gold Rate
                       </div>
                       <div className="text-xl font-black text-text/70 mt-1">
-                        {details.goldRate ? `₹ ${Number(details.goldRate).toLocaleString()}` : '—'}
+                        {details.goldRate ? `₹ ${Number(details.goldRate).toLocaleString('en-IN')}` : '—'}
                       </div>
                     </div>
                   </div>

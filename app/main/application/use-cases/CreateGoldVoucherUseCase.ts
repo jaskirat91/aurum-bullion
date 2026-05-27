@@ -48,16 +48,16 @@ export class CreateGoldVoucherUseCase {
         const iGold = dto.issueGold || 0;
         const rAmt = dto.receiptAmount || 0;
         const iAmt = dto.issueAmount || 0;
-        
+
         const parts: string[] = [];
         if (rGold > 0 || rAmt > 0) {
           const g = rGold > 0 ? `${rGold.toFixed(3)}g gold` : '';
-          const a = rAmt > 0 ? `₹${rAmt.toLocaleString()}` : '';
+          const a = rAmt > 0 ? `₹${rAmt.toLocaleString('en-IN')}` : '';
           parts.push(`Received from ${partyAccount.name}: ${g}${g && a ? ' and ' : ''}${a}`);
         }
         if (iGold > 0 || iAmt > 0) {
           const g = iGold > 0 ? `${iGold.toFixed(3)}g gold` : '';
-          const a = iAmt > 0 ? `₹${iAmt.toLocaleString()}` : '';
+          const a = iAmt > 0 ? `₹${iAmt.toLocaleString('en-IN')}` : '';
           parts.push(`Issued to ${partyAccount.name}: ${g}${g && a ? ' and ' : ''}${a}`);
         }
         finalNarration = parts.join('. ') || `Gold Voucher - ${voucherNo}`;
@@ -103,7 +103,7 @@ export class CreateGoldVoucherUseCase {
         // Gold Entries
         if ((dto.receiptGold || 0) > 0 || (dto.issueGold || 0) > 0) {
           const goldLedgerId = settings.defaultGoldLedgerId;
-          
+
           // Party Line for Gold
           const partyGoldEntry = new LedgerEntry();
           partyGoldEntry.accountId = partyAccount.id;
