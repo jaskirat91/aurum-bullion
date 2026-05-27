@@ -96,6 +96,13 @@ export function CashVoucherForm({ onCancel, onSuccess, editVoucherId, initialDat
     }
   }, [showConfirm]);
 
+  useEffect(() => {
+    if (alert) {
+      const timer = setTimeout(() => setAlert(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [alert]);
+
   // Persistence Logic
   useEffect(() => {
     if (accountId) localStorage.setItem('lastCashAccountId', accountId);
@@ -134,10 +141,12 @@ export function CashVoucherForm({ onCancel, onSuccess, editVoucherId, initialDat
     amountRef.current?.focus();
   };
 
-  const handleReset = () => {
+  const handleReset = (preserveContext = false) => {
     // Account persists, everything else clears
-    setType('Receipt');
-    setEntryDate(today);
+    if (!preserveContext) {
+      setType('Receipt');
+      setEntryDate(today);
+    }
     setNarration('');
     setRemarks('');
     setRemarksTime(getCurrentTime());
@@ -146,9 +155,15 @@ export function CashVoucherForm({ onCancel, onSuccess, editVoucherId, initialDat
     setCashAmount('');
     setGoldRate('');
     setGoldWeight('');
-    setAlert(null);
+    // setAlert(null); // Allow auto-dismiss
     setBalances(null);
-    setTimeout(() => typeRef.current?.focus(), 50);
+    setTimeout(() => {
+      if (preserveContext) {
+        partyRef.current?.focus(); // Focus on party if context preserved
+      } else {
+        typeRef.current?.focus();
+      }
+    }, 50);
   };
 
   const handleSubmit = async (action: 'POST') => {
@@ -202,7 +217,11 @@ export function CashVoucherForm({ onCancel, onSuccess, editVoucherId, initialDat
           ? `Cash Voucher posted successfully! Voucher No: ${voucherNo}`
           : `Draft saved successfully! Voucher No: ${voucherNo}`;
         setAlert({ type: 'success', msg });
-        setTimeout(() => onSuccess(), 1500);
+        if (isEdit) {
+          setTimeout(() => onSuccess(), 1500);
+        } else {
+          handleReset(true); // Preserve context for rapid entry
+        }
       } else {
         setAlert({ type: 'error', msg: (res as any).error ?? 'Operation failed.' });
       }
@@ -463,7 +482,7 @@ export function CashVoucherForm({ onCancel, onSuccess, editVoucherId, initialDat
           <div className="flex-1" />
 
           <button
-            onClick={handleReset}
+            onClick={() => handleReset()}
             disabled={loading !== null}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-text-muted hover:text-danger hover:bg-danger/5 text-xs font-black uppercase transition-all"
           >

@@ -58,7 +58,7 @@ export function JournalManager() {
 
   useEffect(() => {
     fetchJournals();
-  }, [fetchJournals]);
+  }, [fetchJournals, view]);
 
   const totalPages = Math.ceil(total / limit);
 

@@ -88,7 +88,7 @@ export function CustomerOrderManager() {
     }
   }, [page, limit, filters]);
 
-  useEffect(() => { fetchVouchers(); }, [fetchVouchers]);
+  useEffect(() => { fetchVouchers(); }, [fetchVouchers, view]);
 
   const totalPages = Math.ceil(total / limit);
   const updateFilter = (key: string, value: string) => {

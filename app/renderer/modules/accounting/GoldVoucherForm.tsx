@@ -84,6 +84,13 @@ export function GoldVoucherForm({ initialData, onSuccess, onCancel }: GoldVouche
   }, [showConfirm]);
 
   useEffect(() => {
+    if (alert) {
+      const timer = setTimeout(() => setAlert(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [alert]);
+
+  useEffect(() => {
     let active = true;
     if (form.partyAccountId) {
       window.electronAPI.getAccountBalances(form.partyAccountId).then(res => {
@@ -104,10 +111,10 @@ export function GoldVoucherForm({ initialData, onSuccess, onCancel }: GoldVouche
     return () => { active = false; };
   }, [form.partyAccountId]);
 
-  const handleReset = () => {
-    setForm({
+  const handleReset = (preserveContext = false) => {
+    setForm(prev => ({
       voucherNo: '',
-      entryDate: new Date().toISOString().split('T')[0],
+      entryDate: preserveContext ? prev.entryDate : new Date().toISOString().split('T')[0],
       partyId: '',
       partyAccountId: '',
       partyName: '',
@@ -116,15 +123,21 @@ export function GoldVoucherForm({ initialData, onSuccess, onCancel }: GoldVouche
       issueGold: '',
       receiptAmount: '',
       issueAmount: '',
-      type: 'RECEIPT',
+      type: preserveContext ? prev.type : 'RECEIPT',
       narration: '',
       remarks: '',
       remarksTime: getCurrentTime(),
-    });
+    }));
     setBalances(null);
-    setAlert(null);
+    // setAlert(null); // Allow auto-dismiss
     setShowConfirm(false);
-    setTimeout(() => typeRef.current?.focus(), 50);
+    setTimeout(() => {
+      if (preserveContext) {
+        partyRef.current?.focus();
+      } else {
+        typeRef.current?.focus();
+      }
+    }, 50);
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -180,20 +193,18 @@ export function GoldVoucherForm({ initialData, onSuccess, onCancel }: GoldVouche
         status: 'POSTED', // Default to posted for this form
       };
 
-      let res;
-      if (initialData?.voucherId) {
-        res = await window.electronAPI.updateGoldVoucher(initialData.voucherId, dto);
-      } else {
-        res = await window.electronAPI.createGoldVoucher(dto);
-      }
+      const isEdit = !!initialData?.voucherId;
+      const res = isEdit
+        ? await window.electronAPI.updateGoldVoucher(initialData.voucherId, dto)
+        : await window.electronAPI.createGoldVoucher(dto);
 
       if (res.success) {
-        setAlert({ type: 'success', msg: `Voucher ${initialData?.voucherId ? 'updated' : 'created'} successfully.` });
+        setAlert({ type: 'success', msg: `Voucher ${isEdit ? 'updated' : 'created'} successfully.` });
         setShowConfirm(false);
-        if (onSuccess) {
-          setTimeout(() => onSuccess(), 1000);
+        if (isEdit) {
+          if (onSuccess) setTimeout(() => onSuccess(), 1000);
         } else {
-          setTimeout(() => handleReset(), 1500);
+          handleReset(true); // Preserve context for multi-entry
         }
       } else {
         setAlert({ type: 'error', msg: res.error || 'Failed to process.' });
@@ -445,7 +456,7 @@ export function GoldVoucherForm({ initialData, onSuccess, onCancel }: GoldVouche
                 Cancel
               </Button>
             ) : (
-              <Button type="button" variant="ghost" onClick={handleReset} className="flex-1 h-14 bg-surface border border-border rounded-3xl text-text-muted hover:text-danger hover:bg-danger/5 transition-all text-lg font-black uppercase">
+              <Button type="button" variant="ghost" onClick={() => handleReset()} className="flex-1 h-14 bg-surface border border-border rounded-3xl text-text-muted hover:text-danger hover:bg-danger/5 transition-all text-lg font-black uppercase">
                 <RotateCcw size={18} className="mr-2" /> Reset
               </Button>
             )}

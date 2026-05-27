@@ -64,7 +64,7 @@ export class Voucher {
     const { Like } = require('typeorm');
     const lastVoucher = await em.getRepository(Voucher).findOne({
       where: { voucherNo: Like(`${prefix}-${year}-%`) },
-      order: { createdAt: 'DESC' },
+      order: { createdAt: 'DESC', voucherNo: 'DESC' },
     });
 
     let nextNum = 1;

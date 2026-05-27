@@ -38,22 +38,8 @@ export class CreateGoldVoucherUseCase {
       }
 
       // 3. Generate unique Voucher No
-      const voucherRepo = em.getRepository(Voucher);
       const year = new Date(dto.entryDate).getFullYear();
-      const lastVoucher = await voucherRepo.findOne({
-        where: { type: VoucherType.GOLD },
-        order: { createdAt: 'DESC' },
-      });
-
-      let nextNum = 1;
-      if (lastVoucher && lastVoucher.voucherNo) {
-        const parts = lastVoucher.voucherNo.split('-');
-        const lastNum = parseInt(parts[parts.length - 1], 10);
-        if (!isNaN(lastNum)) {
-          nextNum = lastNum + 1;
-        }
-      }
-      const voucherNo = `GOLD-${year}-${String(nextNum).padStart(4, '0')}`;
+      const voucherNo = await Voucher.generateNextVoucherNo(em, 'GOLD', year);
 
       // 4. Create Voucher base
       let finalNarration = dto.narration;

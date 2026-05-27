@@ -98,6 +98,13 @@ export function JournalEntryForm({ onCancel, onSuccess, editJournalId, initialDa
     }
   }, [showConfirm]);
 
+  useEffect(() => {
+    if (alert) {
+      const timer = setTimeout(() => setAlert(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [alert]);
+
   const num = (v: string | number) => parseFloat(v?.toString() || '0') || 0;
 
   const totals = lines.reduce((acc, l) => ({
@@ -111,14 +118,16 @@ export function JournalEntryForm({ onCancel, onSuccess, editJournalId, initialDa
   const isBalancedGold = Math.abs(totals.debitGold - totals.creditGold) < 0.001;
   const isBalanced = isBalancedINR && isBalancedGold;
 
-  const handleReset = () => {
+  const handleReset = (preserveDate = false) => {
     window.electronAPI.getNextVoucherNo().then(res => {
       if (res.success && res.data) setVoucherNo(res.data);
     });
-    setEntryDate(new Date().toISOString().split('T')[0]);
+    if (!preserveDate) {
+      setEntryDate(new Date().toISOString().split('T')[0]);
+    }
     setNarration('');
     setLines([createEmptyLine(), createEmptyLine()]);
-    setAlert(null);
+    // setAlert(null); // Removed to allow alert to auto-dismiss
     setTimeout(() => dateRef.current?.focus(), 50);
   };
 
@@ -164,10 +173,13 @@ export function JournalEntryForm({ onCancel, onSuccess, editJournalId, initialDa
 
       if (result.success) {
         setAlert({ type: 'success', msg: `Journal ${voucherNo} ${editJournalId ? 'updated' : 'posted'} successfully.` });
-        setTimeout(() => {
-          if (onSuccess) onSuccess();
-          handleReset();
-        }, 1500);
+        if (editJournalId) {
+          setTimeout(() => {
+            if (onSuccess) onSuccess();
+          }, 1500);
+        } else {
+          handleReset(true); // Preserve date for multi-entry
+        }
       } else {
         setAlert({ type: 'error', msg: result.error || 'Failed to post.' });
       }
@@ -404,7 +416,7 @@ export function JournalEntryForm({ onCancel, onSuccess, editJournalId, initialDa
                     </Button>
                     <Button 
                        variant="ghost"
-                       onClick={handleReset}
+                       onClick={() => handleReset()}
                        className="h-12 px-6 rounded-2xl font-black text-xs uppercase tracking-widest text-text-muted hover:text-danger"
                     >
                        <RotateCcw size={16} className="mr-2" /> Reset

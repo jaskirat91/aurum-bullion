@@ -91,6 +91,13 @@ export function CustomerOrderForm({ onCancel, onSuccess, editVoucherId, initialD
   }, [showConfirm]);
 
   useEffect(() => {
+    if (alert) {
+      const timer = setTimeout(() => setAlert(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [alert]);
+
+  useEffect(() => {
     if (!isItemModalOpen) return;
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -126,20 +133,28 @@ export function CustomerOrderForm({ onCancel, onSuccess, editVoucherId, initialD
   }
 
 
-  const handleReset = () => {
-    setOrderType('BUY');
-    setEntryDate(today);
+  const handleReset = (preserveContext = false) => {
+    if (!preserveContext) {
+      setOrderType('BUY');
+      setEntryDate(today);
+      setAccountId('');
+      setAccountName('');
+    }
     setNarration('');
-    setAccountId('');
-    setAccountName('');
     setItemId('');
     setItemName('');
     setAmount('');
     setGoldRate('');
     setGoldWeight('');
-    setAlert(null);
+    // setAlert(null); // Allow auto-dismiss
     setBalances(null);
-    setTimeout(() => dateRef.current?.focus(), 50);
+    setTimeout(() => {
+      if (preserveContext) {
+        itemRef.current?.focus();
+      } else {
+        dateRef.current?.focus();
+      }
+    }, 50);
   };
 
   const handleSubmit = async (action: 'POST') => {
@@ -182,7 +197,11 @@ export function CustomerOrderForm({ onCancel, onSuccess, editVoucherId, initialD
           ? `Customer Order posted successfully! Order No: ${voucherNo}`
           : `Draft saved successfully! Order No: ${voucherNo}`;
         setAlert({ type: 'success', msg });
-        setTimeout(() => onSuccess(), 1500);
+        if (isEdit) {
+          setTimeout(() => onSuccess(), 1500);
+        } else {
+          handleReset(true); // Preserve context for rapid entry
+        }
       } else {
         setAlert({ type: 'error', msg: (res as any).error ?? 'Operation failed.' });
       }
@@ -464,7 +483,7 @@ export function CustomerOrderForm({ onCancel, onSuccess, editVoucherId, initialD
           <div className="flex-1" />
 
           <button
-            onClick={handleReset}
+            onClick={() => handleReset()}
             disabled={loading !== null}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-text-muted hover:text-danger hover:bg-danger/5 text-xs font-black uppercase transition-all"
           >

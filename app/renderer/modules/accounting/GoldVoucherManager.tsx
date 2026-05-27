@@ -57,7 +57,7 @@ export function GoldVoucherManager() {
 
   useEffect(() => {
     fetchVouchers();
-  }, [fetchVouchers]);
+  }, [fetchVouchers, showForm]);
 
   const handleEdit = async (voucher: any) => {
     setLoading(true);

@@ -43,26 +43,10 @@ export class CreateCashVoucherUseCase {
       Account.validateFreezeDate(cashAccount, dto.entryDate);
 
       // 3. Generate unique Voucher No
-      const voucherRepo = em.getRepository(Voucher);
       const vType = dto.type === 'Receipt' ? VoucherType.RECEIPT : VoucherType.PAYMENT;
-      
-      const lastVoucher = await voucherRepo.findOne({
-        where: { type: vType },
-        order: { createdAt: 'DESC' }
-      });
-
-      let nextNum = 1;
-      if (lastVoucher && lastVoucher.voucherNo) {
-        const parts = lastVoucher.voucherNo.split('-');
-        const lastNum = parseInt(parts[parts.length - 1], 10);
-        if (!isNaN(lastNum)) {
-          nextNum = lastNum + 1;
-        }
-      }
-
       const year = new Date(dto.entryDate).getFullYear();
       const prefix = dto.type === 'Receipt' ? 'RCT' : 'PMT';
-      const voucherNo = `${prefix}-${year}-${String(nextNum).padStart(4, '0')}`;
+      const voucherNo = await Voucher.generateNextVoucherNo(em, prefix, year);
       let narration = '';
       if (dto.narration?.trim()) {
         narration = dto.narration.trim();
