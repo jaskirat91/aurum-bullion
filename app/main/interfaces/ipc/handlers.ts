@@ -9,7 +9,10 @@ import {
   IssueRawMaterialToManufacturerUseCase,
   IssueRawMaterialDTO,
 } from '../../application/use-cases/IssueRawMaterialToManufacturerUseCase';
-import { UpdateIssueRawMaterialUseCase, UpdateIssueRawMaterialDTO } from '../../application/use-cases/UpdateIssueRawMaterialUseCase';
+import {
+  UpdateIssueRawMaterialUseCase,
+  UpdateIssueRawMaterialDTO,
+} from '../../application/use-cases/UpdateIssueRawMaterialUseCase';
 import { ReverseMaterialIssueUseCase } from '../../application/use-cases/ReverseMaterialIssueUseCase';
 import {
   ReceiveFinishedProductUseCase,
@@ -79,7 +82,10 @@ import {
   CreateCashVoucherUseCase,
   CreateCashVoucherDTO,
 } from '../../application/use-cases/CreateCashVoucherUseCase';
-import { CreateRateCutUseCase, CreateRateCutDTO } from '../../application/use-cases/CreateRateCutUseCase';
+import {
+  CreateRateCutUseCase,
+  CreateRateCutDTO,
+} from '../../application/use-cases/CreateRateCutUseCase';
 import { UpdateCashVoucherUseCase } from '../../application/use-cases/UpdateCashVoucherUseCase';
 import { DeleteCashVoucherUseCase } from '../../application/use-cases/DeleteCashVoucherUseCase';
 import { CancelCashVoucherUseCase } from '../../application/use-cases/CancelCashVoucherUseCase';
@@ -103,19 +109,41 @@ import { ReportService } from '../../application/services/ReportService';
 import { GetPartiesDTO } from '../../application/dto/GetPartiesDTO';
 import { FinishedProductFilter } from '../../domain/repositories/IFinishedProductRepository';
 import { VoucherType } from '../../domain/entities/Voucher';
-import { CreateSaleReturnVoucherUseCase, CreateSaleReturnVoucherDTO } from '../../application/use-cases/CreateSaleReturnVoucherUseCase';
-import { UpdateSaleReturnVoucherUseCase, UpdateSaleReturnVoucherDTO } from '../../application/use-cases/UpdateSaleReturnVoucherUseCase';
+import {
+  CreateSaleReturnVoucherUseCase,
+  CreateSaleReturnVoucherDTO,
+} from '../../application/use-cases/CreateSaleReturnVoucherUseCase';
+import {
+  UpdateSaleReturnVoucherUseCase,
+  UpdateSaleReturnVoucherDTO,
+} from '../../application/use-cases/UpdateSaleReturnVoucherUseCase';
 import { DeleteSaleReturnVoucherUseCase } from '../../application/use-cases/DeleteSaleReturnVoucherUseCase';
-import { SaleReturnVoucherRepository, SaleReturnVoucherFilter } from '../../infrastructure/repositories/SaleReturnVoucherRepository';
-import { CreateCustomerOrderUseCase, CreateCustomerOrderDTO } from '../../application/use-cases/CreateCustomerOrderUseCase';
+import {
+  SaleReturnVoucherRepository,
+  SaleReturnVoucherFilter,
+} from '../../infrastructure/repositories/SaleReturnVoucherRepository';
+import {
+  CreateCustomerOrderUseCase,
+  CreateCustomerOrderDTO,
+} from '../../application/use-cases/CreateCustomerOrderUseCase';
 import { UpdateCustomerOrderUseCase } from '../../application/use-cases/UpdateCustomerOrderUseCase';
 import { DeleteCustomerOrderUseCase } from '../../application/use-cases/DeleteCustomerOrderUseCase';
-import { CustomerOrderVoucherRepository, CustomerOrderVoucherFilter } from '../../infrastructure/repositories/CustomerOrderVoucherRepository';
-import { CreateSupplierOrderUseCase, CreateSupplierOrderDTO } from '../../application/use-cases/CreateSupplierOrderUseCase';
+import { CancelCustomerOrderUseCase } from '../../application/use-cases/CancelCustomerOrderUseCase';
+import {
+  CustomerOrderVoucherRepository,
+  CustomerOrderVoucherFilter,
+} from '../../infrastructure/repositories/CustomerOrderVoucherRepository';
+import {
+  CreateSupplierOrderUseCase,
+  CreateSupplierOrderDTO,
+} from '../../application/use-cases/CreateSupplierOrderUseCase';
 import { UpdateSupplierOrderUseCase } from '../../application/use-cases/UpdateSupplierOrderUseCase';
 import { DeleteSupplierOrderUseCase } from '../../application/use-cases/DeleteSupplierOrderUseCase';
-import { SupplierOrderVoucherRepository, SupplierOrderVoucherFilter } from '../../infrastructure/repositories/SupplierOrderVoucherRepository';
-
+import {
+  SupplierOrderVoucherRepository,
+  SupplierOrderVoucherFilter,
+} from '../../infrastructure/repositories/SupplierOrderVoucherRepository';
+import { CancelSupplierOrderUseCase } from '../../application/use-cases/CancelSupplierOrderUseCase';
 
 /** Wraps async IPC handlers with consistent error shape { success, data?, error? } */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -145,7 +173,7 @@ export function setupIpcHandlers(ipcMain: IpcMain) {
       return { success: false, error: message };
     }
   });
-  
+
   const deleteBatchUseCase = new DeleteBatchUseCase();
   ipcMain.handle('inventory:delete-batch', async (_event, id: string) => {
     try {
@@ -172,16 +200,19 @@ export function setupIpcHandlers(ipcMain: IpcMain) {
   });
 
   const updateIssueRawMaterialUseCase = new UpdateIssueRawMaterialUseCase();
-  ipcMain.handle('inventory:update-issue-raw-material', async (_event, id: string, dto: UpdateIssueRawMaterialDTO) => {
-    try {
-      await updateIssueRawMaterialUseCase.execute(id, dto);
-      return { success: true };
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error('[IPC Error] inventory:update-issue-raw-material:', message);
-      return { success: false, error: message };
-    }
-  });
+  ipcMain.handle(
+    'inventory:update-issue-raw-material',
+    async (_event, id: string, dto: UpdateIssueRawMaterialDTO) => {
+      try {
+        await updateIssueRawMaterialUseCase.execute(id, dto);
+        return { success: true };
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error('[IPC Error] inventory:update-issue-raw-material:', message);
+        return { success: false, error: message };
+      }
+    },
+  );
 
   const reverseMaterialIssueUseCase = new ReverseMaterialIssueUseCase();
   ipcMain.handle('inventory:reverse-material-issue', async (_event, id: string) => {
@@ -209,28 +240,34 @@ export function setupIpcHandlers(ipcMain: IpcMain) {
   });
 
   const createFinishedProductUseCase = new CreateFinishedProductUseCase();
-  ipcMain.handle('inventory:create-finished-product', async (_event, dto: CreateFinishedProductDTO) => {
-    try {
-      const data = await createFinishedProductUseCase.execute(dto);
-      return { success: true, data };
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error('[IPC Error] inventory:create-finished-product:', message);
-      return { success: false, error: message };
-    }
-  });
+  ipcMain.handle(
+    'inventory:create-finished-product',
+    async (_event, dto: CreateFinishedProductDTO) => {
+      try {
+        const data = await createFinishedProductUseCase.execute(dto);
+        return { success: true, data };
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error('[IPC Error] inventory:create-finished-product:', message);
+        return { success: false, error: message };
+      }
+    },
+  );
 
   const updateFinishedProductUseCase = new UpdateFinishedProductUseCase();
-  ipcMain.handle('inventory:update-finished-product', async (_event, dto: UpdateFinishedProductDTO) => {
-    try {
-      await updateFinishedProductUseCase.execute(dto);
-      return { success: true };
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error('[IPC Error] inventory:update-finished-product:', message);
-      return { success: false, error: message };
-    }
-  });
+  ipcMain.handle(
+    'inventory:update-finished-product',
+    async (_event, dto: UpdateFinishedProductDTO) => {
+      try {
+        await updateFinishedProductUseCase.execute(dto);
+        return { success: true };
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error('[IPC Error] inventory:update-finished-product:', message);
+        return { success: false, error: message };
+      }
+    },
+  );
 
   const deleteFinishedProductUseCase = new DeleteFinishedProductUseCase();
   ipcMain.handle('inventory:delete-finished-product', async (_event, id: string) => {
@@ -300,7 +337,7 @@ export function setupIpcHandlers(ipcMain: IpcMain) {
       }
     },
   );
-  
+
   const deleteReceivedFinishedProductUseCase = new DeleteReceivedFinishedProductUseCase();
   ipcMain.handle('manufacturing:delete-received-finished-product', async (_event, id: string) => {
     try {
@@ -1057,6 +1094,18 @@ export function setupIpcHandlers(ipcMain: IpcMain) {
     }
   });
 
+  const cancelCustomerOrderUseCase = new CancelCustomerOrderUseCase();
+  ipcMain.handle('customer-order:cancel', async (_event, voucherId: string) => {
+    try {
+      const data = await cancelCustomerOrderUseCase.execute(voucherId);
+      return { success: true, data };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('[IPC Error] customer-order:cancel:', message);
+      return { success: false, error: message };
+    }
+  });
+
   // ─── Supplier Orders ────────────────────────────────────────────────────
   const createSupplierOrderUseCase = new CreateSupplierOrderUseCase();
   ipcMain.handle('supplier-order:create', async (_event, dto: CreateSupplierOrderDTO) => {
@@ -1119,6 +1168,17 @@ export function setupIpcHandlers(ipcMain: IpcMain) {
     }
   });
 
+  const cancelSupplierOrderUseCase = new CancelSupplierOrderUseCase();
+  ipcMain.handle('supplier-order:cancel', async (_event, voucherId: string) => {
+    try {
+      const data = await cancelSupplierOrderUseCase.execute(voucherId);
+      return { success: true, data };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('[IPC Error] supplier-order:cancel:', message);
+      return { success: false, error: message };
+    }
+  });
 
   // ─── Rate Cut ───────────────────────────────────────────────────────────
   const createRateCutUseCase = new CreateRateCutUseCase();

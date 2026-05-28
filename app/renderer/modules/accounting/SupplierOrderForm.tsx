@@ -18,7 +18,7 @@ interface SupplierOrderFormProps {
   initialData?: {
     voucherId: string;
     orderType: 'BUY' | 'SELL';
-    orderStatus?: 'OPEN' | 'COMPLETED';
+    orderStatus?: 'OPEN' | 'COMPLETED' | 'CANCELLED';
     accountId: string;
     accountName: string;
     itemId?: string;
@@ -36,7 +36,7 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
   const today = new Date().toISOString().split('T')[0];
 
   const [orderType, setOrderType] = useState<'BUY' | 'SELL'>(initialData?.orderType ?? 'BUY');
-  const [orderStatus, setOrderStatus] = useState<'OPEN' | 'COMPLETED'>(initialData?.orderStatus ?? 'OPEN');
+  const [orderStatus, setOrderStatus] = useState<'OPEN' | 'COMPLETED' | 'CANCELLED'>(initialData?.orderStatus == 'CANCELLED' ? 'OPEN': initialData?.orderStatus ?? 'OPEN');
   const [entryDate, setEntryDate] = useState(initialData?.entryDate ?? today);
   const [narration, setNarration] = useState(initialData?.narration ?? '');
   const [accountId, setAccountId] = useState(initialData?.accountId ?? '');
@@ -47,9 +47,9 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
   const [goldRate, setGoldRate] = useState<string>(initialData?.goldRate?.toString() ?? '');
   const [goldWeight, setGoldWeight] = useState<string>(initialData?.goldWeight?.toString() ?? '');
   
-  const [loading, setLoading] = useState<'POST' | null>(null);
+  const [loading, setLoading] = useState<'POST' | 'CANCEL' | null>(null);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
-  const [showConfirm, setShowConfirm] = useState<'POST' | null>(null);
+  const [showConfirm, setShowConfirm] = useState<'POST' | 'CANCEL' | null>(null);
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [balances, setBalances] = useState<any>(null);
 
@@ -61,10 +61,13 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
   const amountRef = useRef<HTMLInputElement>(null);
   const narrationRef = useRef<HTMLTextAreaElement>(null);
   const postBtnRef = useRef<HTMLButtonElement>(null);
+  const cancelBtnRef = useRef<HTMLButtonElement>(null);
   const confirmYesRef = useRef<HTMLButtonElement>(null);
   const confirmNoRef = useRef<HTMLButtonElement>(null);
   const calculateRef = useRef<HTMLButtonElement>(null);
   const resetCalcRef = useRef<HTMLButtonElement>(null);
+  const orderTypeRef = useRef<HTMLInputElement>(null);
+  const orderStatusRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setTimeout(() => {
@@ -110,15 +113,6 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
     return () => document.removeEventListener('keydown', handleEscape, true);
   }, [isItemModalOpen]);
 
-  // Automatic Amount Calculation: goldWeight x goldRate
-  // useEffect(() => {
-  //   const weight = parseFloat(goldWeight) || 0;
-  //   const rate = parseFloat(goldRate) || 0;
-  //   if (weight > 0 && rate > 0) {
-  //     setAmount((weight * rate).toFixed(2));
-  //   }
-  // }, [goldWeight, goldRate]);
-
   const calculateAmountOrGoldWeight = (goldWt: string, goldRate: string, amt: string) => {
     const rate = parseFloat(goldRate) || 0;
     const goldWeight = parseFloat(goldWt) || 0;
@@ -135,9 +129,7 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
   const handleReset = (preserveContext = false) => {
     if (!preserveContext) {
       setOrderType('BUY');
-      setEntryDate(today);
-      setAccountId('');
-      setAccountName('');
+      setEntryDate(today);      
     }
     setNarration('');
     setItemId('');
@@ -145,20 +137,38 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
     setAmount('');
     setGoldRate('');
     setGoldWeight('');
-    // setAlert(null); // Allow auto-dismiss
     setBalances(null);
+    setAccountId('');
+    setAccountName('');
     setTimeout(() => {
-      if (preserveContext) {
-        itemRef.current?.focus();
-      } else {
-        dateRef.current?.focus();
-      }
+      partyRef.current?.focus();      
     }, 50);
   };
 
-  const handleSubmit = async (action: 'POST') => {
+  const handleSubmit = async (action: 'POST' | 'CANCEL') => {
     setShowConfirm(null);
     setAlert(null);
+
+    if (action === 'CANCEL') {
+      setLoading('CANCEL');
+      try {
+        const res = await window.electronAPI.cancelSupplierOrder(editVoucherId!);
+        if (res.success) {
+          setAlert({ type: 'success', msg: 'Order cancelled successfully!' });
+          setTimeout(() => onSuccess(), 1500);
+        } else {
+          setAlert({ type: 'error', msg: (res as any).error ?? 'Failed to cancel order.' });
+          setTimeout(() => cancelBtnRef.current?.focus(), 50);
+        }
+      } catch {
+        setAlert({ type: 'error', msg: 'A system error occurred.' });
+        setTimeout(() => cancelBtnRef.current?.focus(), 50);
+      } finally {
+        setLoading(null);
+      }
+      return;
+    }
+
     if (!entryDate) { setAlert({ type: 'error', msg: 'Entry date is required.' }); return; }
     if (!accountId) { setAlert({ type: 'error', msg: 'Please select a supplier account.' }); return; }
     
@@ -199,7 +209,7 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
         if (isEdit) {
           setTimeout(() => onSuccess(), 1500);
         } else {
-          handleReset(true); // Preserve context for rapid entry
+          handleReset(true);
         }
       } else {
         setAlert({ type: 'error', msg: (res as any).error ?? 'Operation failed.' });
@@ -213,9 +223,7 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
 
   return (
     <div className="h-full w-full flex overflow-hidden bg-background justify-center">
-      {/* Main Form */}
       <div className="w-full max-w-4xl flex flex-col overflow-hidden border-r border-border/50">
-        {/* Header */}
         <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-border bg-surface/50">
           <div className="flex items-center gap-3">
             <button
@@ -238,30 +246,27 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
           </div>
         </div>
 
-        {/* Alert */}
         {alert && (
           <div className="shrink-0 px-6 pt-3 animate-in slide-in-from-top-2 duration-200">
             <Alert type={alert.type} message={alert.msg} onClose={() => setAlert(null)} />
           </div>
         )}
 
-        {/* Scrollable Form Body */}
         <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-5 space-y-6">
-          
-          {/* Row 1: Type Selection */}
           <div className="flex gap-8">
             <div className="flex-1 max-w-xs">
               <label className="text-[9px] font-black uppercase tracking-widest text-text-muted block mb-2 flex items-center gap-1">
                 Order Type
               </label>
               <SegmentedControl
+                inputRef={orderTypeRef}
                 options={[
                   { label: 'Buy', value: 'BUY' },
                   { label: 'Sell', value: 'SELL' },
                 ]}
                 value={orderType}
                 onChange={(val: any) => setOrderType(val)}
-                onEnter={() => dateRef.current?.focus()}
+                onEnter={() => orderStatusRef.current?.focus()}
               />
             </div>
 
@@ -271,12 +276,15 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
                   Order Status
                 </label>
                 <SegmentedControl
+                  inputRef={orderStatusRef}
                   options={[
                     { label: 'Open', value: 'OPEN' },
                     { label: 'Completed', value: 'COMPLETED' },
+                    // { label: 'Cancelled', value: 'CANCELLED' },
                   ]}
                   value={orderStatus}
                   onChange={(val: any) => setOrderStatus(val)}
+                  onEnter={() => dateRef.current?.focus()}
                 />
               </div>
             )}
@@ -285,7 +293,6 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
           <div className="h-px bg-border/40 my-2" />
 
           <div className="grid grid-cols-2 gap-6">
-            {/* Date + Party + Item */}
             <div className="space-y-5">
               <div>
                 <label className="text-[9px] font-black uppercase tracking-widest text-text-muted block mb-1.5 flex items-center gap-1">
@@ -363,7 +370,6 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
               </div>
             </div>
 
-            {/* Narration */}
             <div>
               <label className="text-[9px] font-black uppercase tracking-widest text-text-muted block mb-1.5 flex items-center gap-1">
                 <FileText size={10} /> Narration
@@ -381,9 +387,7 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
 
           <div className="h-px bg-border/40 my-2" />
 
-          {/* Amounts Section */}
           <div className="grid grid-cols-[1fr_1fr_1fr_1fr] gap-4 bg-surface/30 p-6 rounded-2xl border border-border/40 items-end">
-
             <div>
               <label className="text-[9px] font-black uppercase tracking-widest text-text-muted block mb-1.5 flex items-center gap-1">
                 <TrendingUp size={10} /> Gold Rate per gram
@@ -448,23 +452,19 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
                   ref={calculateRef}
                   type="button"
                   onClick={() => calculateAmountOrGoldWeight(goldWeight,goldRate,amount)}
-                  // onKeyDown={e => e.key === 'Enter' && (resetCalcRef.current?.focus())}
                   className='flex items-center gap-2 px-3 py-3 rounded-xl bg-primary text-white font-black uppercase shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all disabled:opacity-50'
                 ><Calculator size={26} /></button>
                 <button
                   ref={resetCalcRef}
                   type="button"
                   onClick={() => {setGoldRate(''),setGoldWeight(''),setAmount('')}}
-                  // onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), narrationRef.current?.focus())}
                   className='flex items-center gap-2 px-3 py-3 rounded-xl bg-gray-500 text-white font-black uppercase shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all disabled:opacity-50'
                 ><RotateCcw size={26} /></button>
               </div>
             </div>
-
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="shrink-0 px-6 py-4 border-t border-border bg-surface/50 flex items-center gap-3">
           <button
             ref={postBtnRef}
@@ -477,6 +477,20 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
               : <SendHorizonal size={14} />}
             Confirm Order
           </button>
+
+          {isEdit && initialData?.orderStatus !== 'CANCELLED' && (
+            <button
+              ref={cancelBtnRef}
+              onClick={() => setShowConfirm('CANCEL')}
+              disabled={loading !== null}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-danger text-white text-xs font-black uppercase shadow-lg shadow-danger/20 hover:shadow-danger/30 transition-all disabled:opacity-50"
+            >
+              {loading === 'CANCEL'
+                ? <RotateCcw size={14} className="animate-spin" />
+                : <AlertCircle size={14} />}
+              Cancel Order
+            </button>
+          )}
 
           <div className="flex-1" />
 
@@ -493,24 +507,31 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
             disabled={loading !== null}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-text-muted hover:text-text text-xs font-black uppercase transition-all"
           >
-            <AlertCircle size={14} /> Cancel
+            <ArrowLeft size={14} /> Back
           </button>
         </div>
       </div>
 
-      {/* Confirmation Modal */}
       {showConfirm && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
-           <div className="absolute inset-0 bg-background/60 backdrop-blur-md" onClick={() => { setShowConfirm(null); setTimeout(() => postBtnRef.current?.focus(), 50); }} />
+           <div className="absolute inset-0 bg-background/60 backdrop-blur-md" onClick={() => { 
+             const prev = showConfirm;
+             setShowConfirm(null); 
+             setTimeout(() => (prev === 'POST' ? postBtnRef.current : cancelBtnRef.current)?.focus(), 50); 
+           }} />
            <div className="relative w-full max-w-sm bg-surface border border-border shadow-2xl rounded-3xl p-6 animate-in zoom-in-95 duration-200">
               <div className="flex flex-col items-center text-center gap-4">
-                 <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                 <div className={`h-14 w-14 rounded-2xl flex items-center justify-center ${showConfirm === 'POST' ? 'bg-primary/10 text-primary' : 'bg-danger/10 text-danger'}`}>
                     <HelpCircle size={32} />
                  </div>
                  <div>
-                    <h3 className="text-lg font-black text-text uppercase tracking-tight">Confirm Submission</h3>
+                    <h3 className="text-lg font-black text-text uppercase tracking-tight">
+                      {showConfirm === 'POST' ? 'Confirm Submission' : 'Confirm Cancellation'}
+                    </h3>
                     <p className="text-sm text-text-muted mt-1 leading-relaxed font-medium">
-                       Are you sure you want to post this order to the ledger?
+                       {showConfirm === 'POST' 
+                         ? 'Are you sure you want to post this order to the ledger?' 
+                         : 'Are you sure you want to CANCEL this order? This will delete all associated ledger entries and cannot be undone.'}
                     </p>
                  </div>
                  <div className="grid grid-cols-2 gap-3 w-full mt-2">
@@ -527,15 +548,16 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
                           confirmNoRef.current?.focus();
                         }
                       }}
-                      className="flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-primary text-white font-black uppercase text-xs shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all outline-none focus:ring-2 focus:ring-primary/20"
+                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-white font-black uppercase text-xs shadow-lg transition-all outline-none focus:ring-2 ${showConfirm === 'POST' ? 'bg-primary shadow-primary/20 hover:shadow-primary/30 focus:ring-primary/20' : 'bg-danger shadow-danger/20 hover:shadow-danger/30 focus:ring-danger/20'}`}
                     >
                       <CheckCircle2 size={16} /> Yes, Proceed
                     </button>
                     <button
                       ref={confirmNoRef}
                       onClick={() => {
+                        const targetRef = showConfirm === 'POST' ? postBtnRef : cancelBtnRef;
                         setShowConfirm(null);
-                        setTimeout(() => postBtnRef.current?.focus(), 50);
+                        setTimeout(() => targetRef.current?.focus(), 50);
                       }}
                       onKeyDown={(e) => {
                         if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
@@ -557,7 +579,6 @@ export function SupplierOrderForm({ onCancel, onSuccess, editVoucherId, initialD
         </div>
       )}
 
-      {/* Right Side: Real-time Pure Gold Monitor */}
       <aside className="w-80 shrink-0 h-full p-4 flex flex-col bg-surface/20">
         <PureMonitor
           partyId={accountId}

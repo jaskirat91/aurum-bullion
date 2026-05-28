@@ -161,6 +161,7 @@ export type ElectronAPI = {
     filters?: any,
   ) => Promise<IPCResult<{ items: any[]; total: number }>>;
   getCustomerOrderDetails: (voucherId: string) => Promise<IPCResult<any>>;
+  cancelCustomerOrder: (voucherId: string) => Promise<IPCResult<any>>;
   deleteCustomerOrder: (voucherId: string) => Promise<IPCResult<void>>;
   updateCustomerOrder: (voucherId: string, dto: any) => Promise<IPCResult<{ voucherNo: string }>>;
   createSupplierOrder: (dto: any) => Promise<IPCResult<{ voucherNo: string }>>;
@@ -170,6 +171,7 @@ export type ElectronAPI = {
     filters?: any,
   ) => Promise<IPCResult<{ items: any[]; total: number }>>;
   getSupplierOrderDetails: (voucherId: string) => Promise<IPCResult<any>>;
+  cancelSupplierOrder: (voucherId: string) => Promise<IPCResult<void>>;
   deleteSupplierOrder: (voucherId: string) => Promise<IPCResult<void>>;
   updateSupplierOrder: (voucherId: string, dto: any) => Promise<IPCResult<{ voucherNo: string }>>;
 
@@ -302,6 +304,7 @@ const api: ElectronAPI = {
     ipcRenderer.invoke('query:list-customer-orders', page, limit, filters),
   getCustomerOrderDetails: (voucherId) =>
     ipcRenderer.invoke('customer-order:get-details', voucherId),
+  cancelCustomerOrder: (voucherId) => ipcRenderer.invoke('customer-order:cancel', voucherId),
   deleteCustomerOrder: (voucherId) => ipcRenderer.invoke('customer-order:delete', voucherId),
   updateCustomerOrder: (voucherId, dto) =>
     ipcRenderer.invoke('customer-order:update', voucherId, dto),
@@ -310,6 +313,7 @@ const api: ElectronAPI = {
     ipcRenderer.invoke('query:list-supplier-orders', page, limit, filters),
   getSupplierOrderDetails: (voucherId) =>
     ipcRenderer.invoke('supplier-order:get-details', voucherId),
+  cancelSupplierOrder: (voucherId) => ipcRenderer.invoke('supplier-order:cancel', voucherId),
   deleteSupplierOrder: (voucherId) => ipcRenderer.invoke('supplier-order:delete', voucherId),
   updateSupplierOrder: (voucherId, dto) =>
     ipcRenderer.invoke('supplier-order:update', voucherId, dto),

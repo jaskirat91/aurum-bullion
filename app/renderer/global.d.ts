@@ -167,6 +167,7 @@ export interface ElectronAPI {
     filters?: any,
   ): Promise<IPCResult<{ items: any[]; total: number }>>;
   getCustomerOrderDetails(voucherId: string): Promise<IPCResult<any>>;
+  cancelCustomerOrder(voucherId: string): Promise<IPCResult<void>>;
   deleteCustomerOrder(voucherId: string): Promise<IPCResult<void>>;
   updateCustomerOrder(voucherId: string, dto: any): Promise<IPCResult<{ voucherNo: string }>>;
   createSupplierOrder(dto: any): Promise<IPCResult<{ voucherNo: string }>>;
@@ -176,6 +177,7 @@ export interface ElectronAPI {
     filters?: any,
   ): Promise<IPCResult<{ items: any[]; total: number }>>;
   getSupplierOrderDetails(voucherId: string): Promise<IPCResult<any>>;
+  cancelSupplierOrder(voucherId: string): Promise<IPCResult<void>>;
   deleteSupplierOrder(voucherId: string): Promise<IPCResult<void>>;
   updateSupplierOrder(voucherId: string, dto: any): Promise<IPCResult<{ voucherNo: string }>>;
 

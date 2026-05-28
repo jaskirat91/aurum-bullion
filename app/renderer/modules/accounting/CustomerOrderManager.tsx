@@ -21,7 +21,7 @@ interface CustomerOrderRow {
   };
   account: { name: string; code: string };
   orderType: 'BUY' | 'SELL';
-  orderStatus: 'OPEN' | 'COMPLETED';
+  orderStatus: 'OPEN' | 'COMPLETED' | 'CANCELLED';
   amount?: number;
   goldWeight?: number;
   createdAt: string;
@@ -30,7 +30,7 @@ interface CustomerOrderRow {
 interface EditData {
   voucherId: string;
   orderType: 'BUY' | 'SELL';
-  orderStatus: 'OPEN' | 'COMPLETED';
+  orderStatus: 'OPEN' | 'COMPLETED' | 'CANCELLED';
   accountId: string;
   accountName: string;
   itemId?: string;
@@ -46,6 +46,7 @@ const ORDER_STATUS_OPTIONS = [
   { value: '', label: 'All Orders' },
   { value: 'OPEN', label: 'Open' },
   { value: 'COMPLETED', label: 'Completed' },
+  { value: 'CANCELLED', label: 'Cancelled' },
 ];
 
 const TYPE_OPTIONS = [
