@@ -1,11 +1,13 @@
 import { AppDataSource } from '../../infrastructure/database/data-source';
 import { JournalEntry, JournalEntryStatus } from '../../domain/entities/JournalEntry';
 import { LedgerEntry } from '../../domain/entities/LedgerEntry';
-import { CompanySetting } from '../../domain/entities/CompanySetting';
 import { Voucher, VoucherStatus, VoucherType } from '../../domain/entities/Voucher';
 import { CashVoucher } from '../../domain/entities/CashVoucher';
 import { CreateCashVoucherDTO } from './CreateCashVoucherUseCase';
 import { Account } from '../../domain/entities/Account';
+import { CustomerOrderVoucher } from '../../domain/entities/CustomerOrderVoucher';
+import { SupplierOrderVoucher } from '../../domain/entities/SupplierOrderVoucher';
+import { OrderStatus } from '../../domain/entities/OrderStatus';
 
 export class UpdateCashVoucherUseCase {
   async execute(
@@ -26,7 +28,7 @@ export class UpdateCashVoucherUseCase {
       if (cv) {
         const oldPartyAccount = await accountRepo.findOne({ where: { id: cv.partyAccountId } });
         if (oldPartyAccount) Account.validateFreezeDate(oldPartyAccount, voucher.entryDate);
-        
+
         if (cv.accountId) {
           const oldCashAccount = await accountRepo.findOne({ where: { id: cv.accountId } });
           if (oldCashAccount) Account.validateFreezeDate(oldCashAccount, voucher.entryDate);
@@ -80,12 +82,15 @@ export class UpdateCashVoucherUseCase {
       cv.goldWeight = dto.goldWeight;
       cv.remarks = dto.remarks;
       cv.remarksTime = dto.remarksTime;
+      cv.customerOrderVoucherId = dto.customerOrderVoucherId ? dto.customerOrderVoucherId : null!;
+      cv.supplierOrderVoucherId = dto.supplierOrderVoucherId ? dto.supplierOrderVoucherId : null!;
+
       await cvRepo.save(cv);
 
       // 6. Handle Ledger Entries (Wipe and Recreate)
       const jeRepo = em.getRepository(JournalEntry);
       const ledgerRepo = em.getRepository(LedgerEntry);
-      
+
       const existingJE = await jeRepo.findOne({ where: { voucherId: voucher.id } });
       if (existingJE) {
         await ledgerRepo.delete({ journalEntryId: existingJE.id });
@@ -145,6 +150,45 @@ export class UpdateCashVoucherUseCase {
 
         if (entries.length > 0) {
           await em.save(LedgerEntry, entries);
+        }
+
+        // 7. Order Fulfillment Logic
+        if (dto.customerOrderVoucherId || dto.supplierOrderVoucherId) {
+          const orderId = dto.customerOrderVoucherId || dto.supplierOrderVoucherId;
+          const isCustomerOrder = !!dto.customerOrderVoucherId;
+          const orderRepo = isCustomerOrder
+            ? em.getRepository(CustomerOrderVoucher)
+            : em.getRepository(SupplierOrderVoucher);
+
+          const order = await orderRepo.findOne({ where: { voucherId: orderId } });
+          if (order) {
+            const {
+              JournalEntryRepository,
+            } = require('../../infrastructure/repositories/JournalEntryRepository');
+            const journalRepo = new JournalEntryRepository();
+
+            const stats = await journalRepo.getOrderFulfillmentStats(
+              orderId!,
+              dto.partyAccountId,
+              isCustomerOrder,
+              em,
+            );
+
+            const netAmount = Math.abs(
+              (Number(stats.totalDebitAmount) || 0) - (Number(stats.totalCreditAmount) || 0),
+            );
+            const netGold = Math.abs(
+              (Number(stats.totalDebitGold) || 0) - (Number(stats.totalCreditGold) || 0),
+            );
+
+            const orderAmount = Number(order.amount) || 0;
+            const orderGold = Number(order.goldWeight) || 0;
+
+            if (netAmount >= orderAmount && netGold >= orderGold) {
+              order.orderStatus = OrderStatus.COMPLETED;
+              await orderRepo.save(order);
+            }
+          }
         }
       }
 

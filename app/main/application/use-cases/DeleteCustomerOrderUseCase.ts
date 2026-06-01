@@ -5,6 +5,8 @@ import { Voucher } from '../../domain/entities/Voucher';
 import { CustomerOrderVoucher } from '../../domain/entities/CustomerOrderVoucher';
 import { Account } from '../../domain/entities/Account';
 import { CompanySetting } from '../../domain/entities/CompanySetting';
+import { CashVoucher } from '../../domain/entities/CashVoucher';
+import { GoldVoucher } from '../../domain/entities/GoldVoucher';
 
 export class DeleteCustomerOrderUseCase {
   async execute(voucherId: string): Promise<{ success: boolean }> {
@@ -15,29 +17,44 @@ export class DeleteCustomerOrderUseCase {
       const orderVoucher = await em.findOne(CustomerOrderVoucher, { where: { voucherId } });
       if (orderVoucher) {
         const accountRepo = em.getRepository(Account);
-        const customerAccount = await accountRepo.findOne({ where: { id: orderVoucher.accountId } });
+        const customerAccount = await accountRepo.findOne({
+          where: { id: orderVoucher.accountId },
+        });
         if (customerAccount) Account.validateFreezeDate(customerAccount, voucher.entryDate);
 
         const companySettingsRepo = em.getRepository(CompanySetting);
         const settings = await companySettingsRepo.findOne({ where: { id: 'current' } });
         if (settings) {
-          const cashAccount = await accountRepo.findOne({ where: { id: settings.defaultCashLedgerId } });
+          const cashAccount = await accountRepo.findOne({
+            where: { id: settings.defaultCashLedgerId },
+          });
           if (cashAccount) Account.validateFreezeDate(cashAccount, voucher.entryDate);
 
-          const goldAccount = await accountRepo.findOne({ where: { id: settings.defaultGoldLedgerId } });
+          const goldAccount = await accountRepo.findOne({
+            where: { id: settings.defaultGoldLedgerId },
+          });
           if (goldAccount) Account.validateFreezeDate(goldAccount, voucher.entryDate);
         }
       }
 
       const journalRepo = em.getRepository(JournalEntry);
       const ledgerRepo = em.getRepository(LedgerEntry);
-      
+
       const je = await journalRepo.findOne({ where: { voucherId: voucher.id } });
-      
+
       if (je) {
         await ledgerRepo.delete({ journalEntryId: je.id });
         await journalRepo.delete({ id: je.id });
       }
+
+      // Nullify references in CashVoucher and GoldVoucher to avoid FK constraints
+      await em
+        .getRepository(CashVoucher)
+        .update({ customerOrderVoucherId: voucher.id }, { customerOrderVoucherId: null as any });
+
+      await em
+        .getRepository(GoldVoucher)
+        .update({ customerOrderVoucherId: voucher.id }, { customerOrderVoucherId: null as any });
 
       await em.getRepository(CustomerOrderVoucher).delete({ voucherId: voucher.id });
       await em.getRepository(Voucher).delete({ id: voucher.id });

@@ -1,10 +1,13 @@
 import { AppDataSource } from '../../infrastructure/database/data-source';
 import { JournalEntry, JournalEntryStatus } from '../../domain/entities/JournalEntry';
 import { LedgerEntry } from '../../domain/entities/LedgerEntry';
-import { CompanySetting } from '../../domain/entities/CompanySetting';
 import { Voucher, VoucherStatus, VoucherType } from '../../domain/entities/Voucher';
 import { CashVoucher } from '../../domain/entities/CashVoucher';
 import { Account } from '../../domain/entities/Account';
+import { CustomerOrderVoucher } from '../../domain/entities/CustomerOrderVoucher';
+import { SupplierOrderVoucher } from '../../domain/entities/SupplierOrderVoucher';
+import { OrderStatus } from '../../domain/entities/OrderStatus';
+import { JournalEntryRepository } from '../../infrastructure/repositories/JournalEntryRepository';
 
 export interface CreateCashVoucherDTO {
   type: 'Receipt' | 'Payment';
@@ -18,6 +21,8 @@ export interface CreateCashVoucherDTO {
   narration?: string;
   remarks?: string;
   remarksTime?: string;
+  customerOrderVoucherId?: string;
+  supplierOrderVoucherId?: string;
   action: 'DRAFT' | 'POST';
 }
 
@@ -38,7 +43,8 @@ export class CreateCashVoucherUseCase {
         throw new Error('Cash/Bank account is required.');
       }
       const cashAccount = await accountRepo.findOne({ where: { id: dto.accountId } });
-      if (!cashAccount) throw new Error('Cash/Bank account not found. Please re-select the account.');
+      if (!cashAccount)
+        throw new Error('Cash/Bank account not found. Please re-select the account.');
 
       Account.validateFreezeDate(cashAccount, dto.entryDate);
 
@@ -79,6 +85,12 @@ export class CreateCashVoucherUseCase {
       cashVoucher.goldWeight = dto.goldWeight;
       cashVoucher.remarks = dto.remarks;
       cashVoucher.remarksTime = dto.remarksTime;
+      if (dto.customerOrderVoucherId) {
+        cashVoucher.customerOrderVoucherId = dto.customerOrderVoucherId;
+      }
+      if (dto.supplierOrderVoucherId) {
+        cashVoucher.supplierOrderVoucherId = dto.supplierOrderVoucherId;
+      }
       await em.save(cashVoucher);
 
       // 6. Create Journal + Ledger entries only when posting
@@ -134,6 +146,42 @@ export class CreateCashVoucherUseCase {
 
         je.ledgerEntries = entries;
         await em.save(je);
+
+        // 7. Order Fulfillment Logic
+        if (dto.customerOrderVoucherId || dto.supplierOrderVoucherId) {
+          const orderId = dto.customerOrderVoucherId || dto.supplierOrderVoucherId;
+          const isCustomerOrder = !!dto.customerOrderVoucherId;
+          const orderRepo = isCustomerOrder
+            ? em.getRepository(CustomerOrderVoucher)
+            : em.getRepository(SupplierOrderVoucher);
+
+          const order = await orderRepo.findOne({ where: { voucherId: orderId } });
+          if (order) {
+            const journalRepo = new JournalEntryRepository();
+
+            const stats = await journalRepo.getOrderFulfillmentStats(
+              orderId!,
+              dto.partyAccountId,
+              isCustomerOrder,
+              em,
+            );
+
+            const netAmount = Math.abs(
+              (Number(stats.totalDebitAmount) || 0) - (Number(stats.totalCreditAmount) || 0),
+            );
+            const netGold = Math.abs(
+              (Number(stats.totalDebitGold) || 0) - (Number(stats.totalCreditGold) || 0),
+            );
+
+            const orderAmount = Number(order.amount) || 0;
+            const orderGold = Number(order.goldWeight) || 0;
+
+            if (netAmount >= orderAmount && netGold >= orderGold) {
+              order.orderStatus = OrderStatus.COMPLETED;
+              await orderRepo.save(order);
+            }
+          }
+        }
       }
 
       return { success: true, voucherNo };

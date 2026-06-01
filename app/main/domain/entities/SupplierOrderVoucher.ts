@@ -8,10 +8,13 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { CashVoucher } from './CashVoucher';
+import { GoldVoucher } from './GoldVoucher';
 
 export enum OrderType {
   BUY = 'BUY',
@@ -55,6 +58,12 @@ export class SupplierOrderVoucher {
 
   @Column({ type: 'decimal', precision: 18, scale: 2, nullable: true })
   amount?: number;
+
+  @OneToMany(() => CashVoucher, (cashVoucher) => cashVoucher.supplierOrderVoucher)
+  cashVouchers?: CashVoucher[];
+
+  @OneToMany(() => GoldVoucher, (goldVoucher) => goldVoucher.supplierOrderVoucher)
+  goldVouchers?: GoldVoucher[];
 
   @CreateDateColumn()
   createdAt!: Date;

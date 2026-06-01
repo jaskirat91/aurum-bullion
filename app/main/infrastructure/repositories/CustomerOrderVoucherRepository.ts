@@ -1,6 +1,7 @@
 import { AppDataSource } from '../database/data-source';
 import { CustomerOrderVoucher } from '../../domain/entities/CustomerOrderVoucher';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
+import { OrderStatus } from '../../domain/entities/OrderStatus';
 
 export interface CustomerOrderVoucherFilter {
   voucherNo?: string;
@@ -79,6 +80,21 @@ export class CustomerOrderVoucherRepository {
     return this.repo.findOne({
       where: { voucherId },
       relations: ['voucher', 'account', 'item'],
+    });
+  }
+
+  async findOpenOrdersByAccountId(accountId: string): Promise<CustomerOrderVoucher[]> {
+    return this.repo.find({
+      where: {
+        accountId,
+        orderStatus: In([OrderStatus.OPEN, OrderStatus.COMPLETED]),
+      },
+      relations: ['voucher', 'account', 'item'],
+      order: {
+        voucher: {
+          entryDate: 'DESC',
+        },
+      },
     });
   }
 }

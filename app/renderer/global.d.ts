@@ -50,6 +50,9 @@ export interface ElectronAPI {
   getPartyBalances(partyId: string): Promise<IPCResult<{ gold: any; cash: any }>>;
   getAccountBalances(accountId: string): Promise<IPCResult<{ gold: any; cash: any }>>;
   getBatchDetails(batchNo: string): Promise<IPCResult<any>>;
+  getPartyByAccountId(accountId: string): Promise<IPCResult<any>>;
+  getOpenOrdersByAccountId(accountId: string, partyType: string): Promise<IPCResult<any[]>>;
+  getOrderTransactions(orderVoucherId: string, accountId: string, isCustomerOrder: boolean): Promise<IPCResult<any[]>>;
   listBatches(filters?: { assignedTo?: string; status?: string }): Promise<IPCResult<unknown[]>>;
   listFinishedProducts(filter?: {
     itemId?: string;

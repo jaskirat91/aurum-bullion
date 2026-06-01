@@ -10,6 +10,8 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { CustomerOrderVoucher } from './CustomerOrderVoucher';
+import { SupplierOrderVoucher } from './SupplierOrderVoucher';
 
 @Entity('cash_vouchers')
 export class CashVoucher {
@@ -51,6 +53,20 @@ export class CashVoucher {
 
   @Column({ type: 'varchar', length: 20, nullable: true })
   remarksTime?: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  customerOrderVoucherId?: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  supplierOrderVoucherId?: string;
+
+  @ManyToOne(() => CustomerOrderVoucher, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'customerOrderVoucherId' })
+  customerOrderVoucher?: CustomerOrderVoucher;
+
+  @ManyToOne(() => SupplierOrderVoucher, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'supplierOrderVoucherId' })
+  supplierOrderVoucher?: SupplierOrderVoucher;
 
   @CreateDateColumn()
   createdAt!: Date;

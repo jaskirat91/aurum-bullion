@@ -5,6 +5,8 @@ import { Voucher } from '../../domain/entities/Voucher';
 import { SupplierOrderVoucher } from '../../domain/entities/SupplierOrderVoucher';
 import { Account } from '../../domain/entities/Account';
 import { CompanySetting } from '../../domain/entities/CompanySetting';
+import { CashVoucher } from '../../domain/entities/CashVoucher';
+import { GoldVoucher } from '../../domain/entities/GoldVoucher';
 
 export class DeleteSupplierOrderUseCase {
   async execute(voucherId: string): Promise<{ success: boolean }> {
@@ -38,6 +40,17 @@ export class DeleteSupplierOrderUseCase {
         await ledgerRepo.delete({ journalEntryId: je.id });
         await journalRepo.delete({ id: je.id });
       }
+
+      // Nullify references in CashVoucher and GoldVoucher to avoid FK constraints
+      await em.getRepository(CashVoucher).update(
+        { supplierOrderVoucherId: voucher.id },
+        { supplierOrderVoucherId: null as any }
+      );
+      
+      await em.getRepository(GoldVoucher).update(
+        { supplierOrderVoucherId: voucher.id },
+        { supplierOrderVoucherId: null as any }
+      );
 
       await em.getRepository(SupplierOrderVoucher).delete({ voucherId: voucher.id });
       await em.getRepository(Voucher).delete({ id: voucher.id });

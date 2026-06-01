@@ -30,6 +30,10 @@ export class CashVoucherRepository {
       .createQueryBuilder('cv')
       .leftJoinAndSelect('cv.voucher', 'voucher')
       .leftJoinAndSelect('cv.partyAccount', 'partyAccount')
+      .leftJoinAndSelect('cv.customerOrderVoucher', 'cov')
+      .leftJoinAndSelect('cv.supplierOrderVoucher', 'sov')
+      .leftJoinAndSelect('cov.voucher', 'customerOrderVoucher')
+      .leftJoinAndSelect('sov.voucher', 'supplierOrderVoucher')
       .orderBy('voucher.entryDate', 'DESC')
       .addOrderBy('cv.createdAt', 'DESC')
       .skip(skip)
@@ -73,18 +77,24 @@ export class CashVoucherRepository {
   async getDetails(voucherId: string): Promise<CashVoucher | null> {
     return this.repo.findOne({
       where: { voucherId },
-      relations: ['voucher', 'partyAccount', 'account'],
+      relations: [
+        'voucher',
+        'partyAccount',
+        'account',
+        'customerOrderVoucher',
+        'supplierOrderVoucher',
+      ],
     });
   }
 
   async generateNextVoucherNo(type: VoucherType): Promise<string> {
     const year = new Date().getFullYear();
     const voucherRepo = AppDataSource.getRepository(Voucher);
-    
+
     // Find the last voucher of this specific type (RECEIPT or PAYMENT)
     const lastVoucher = await voucherRepo.findOne({
       where: { type },
-      order: { createdAt: 'DESC' }
+      order: { createdAt: 'DESC' },
     });
 
     let nextNum = 1;

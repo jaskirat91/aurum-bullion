@@ -121,4 +121,88 @@ export class JournalEntryRepository implements IJournalEntryRepository {
     const { AppDataSource } = require('../database/data-source');
     return Voucher.generateNextVoucherNo(AppDataSource.manager, 'JV', year);
   }
+
+  async getOrderTransactions(
+    orderVoucherId: string,
+    accountId: string,
+    isCustomerOrder: boolean,
+  ): Promise<any[]> {
+    const { LedgerEntry } = require('../../domain/entities/LedgerEntry');
+    const { VoucherStatus } = require('../../domain/entities/Voucher');
+
+    const qb = AppDataSource.createQueryBuilder(LedgerEntry, 'le')
+      .innerJoin('journal_entries', 'je', 'le.journalEntryId = je.id')
+      .innerJoin('vouchers', 'v', 'je.voucherId = v.id')
+      .leftJoin('cash_vouchers', 'cv', 'v.id = cv.voucherId')
+      .leftJoin('gold_vouchers', 'gv', 'v.id = gv.voucherId')
+      .where('le.accountId = :accountId', { accountId })
+      .andWhere('v.status = :status', { status: VoucherStatus.POSTED });
+
+    if (isCustomerOrder) {
+      qb.andWhere(
+        '(cv.customerOrderVoucherId = :orderVoucherId OR gv.customerOrderVoucherId = :orderVoucherId)',
+        { orderVoucherId },
+      );
+    } else {
+      qb.andWhere(
+        '(cv.supplierOrderVoucherId = :orderVoucherId OR gv.supplierOrderVoucherId = :orderVoucherId)',
+        { orderVoucherId },
+      );
+    }
+
+    return qb
+      .select([
+        'je.entryDate as entryDate',
+        'v.voucherNo as voucherNo',
+        'je.narration as narration',
+        'SUM(le.creditAmount) as creditAmount',
+        'SUM(le.debitAmount) as debitAmount',
+        'SUM(le.creditGold) as creditGold',
+        'SUM(le.debitGold) as debitGold',
+      ])
+      .groupBy('je.id')
+      .orderBy('je.entryDate', 'ASC')
+      .getRawMany();
+  }
+
+  async getOrderFulfillmentStats(
+    orderVoucherId: string,
+    accountId: string,
+    isCustomerOrder: boolean,
+    em?: any,
+  ): Promise<any> {
+    const { LedgerEntry } = require('../../domain/entities/LedgerEntry');
+    const { VoucherStatus } = require('../../domain/entities/Voucher');
+
+    const manager = em || AppDataSource.manager;
+    const qb = manager
+      .createQueryBuilder(LedgerEntry, 'le')
+      .innerJoin('journal_entries', 'je', 'le.journalEntryId = je.id')
+      .innerJoin('vouchers', 'v', 'je.voucherId = v.id')
+      .leftJoin('cash_vouchers', 'cv', 'v.id = cv.voucherId')
+      .leftJoin('gold_vouchers', 'gv', 'v.id = gv.voucherId')
+      .where('le.accountId = :accountId', { accountId })
+      .andWhere('v.status = :status', { status: VoucherStatus.POSTED });
+
+    if (isCustomerOrder) {
+      qb.andWhere(
+        '(cv.customerOrderVoucherId = :orderVoucherId OR gv.customerOrderVoucherId = :orderVoucherId)',
+        { orderVoucherId },
+      );
+    } else {
+      qb.andWhere(
+        '(cv.supplierOrderVoucherId = :orderVoucherId OR gv.supplierOrderVoucherId = :orderVoucherId)',
+        { orderVoucherId },
+      );
+    }
+
+    return qb
+      .select([
+        'SUM(le.debitAmount) as totalDebitAmount',
+        'SUM(le.creditAmount) as totalCreditAmount',
+        'SUM(le.debitGold) as totalDebitGold',
+        'SUM(le.creditGold) as totalCreditGold',
+      ])
+      .getRawOne();
+  }
 }

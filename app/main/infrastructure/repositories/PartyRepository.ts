@@ -19,6 +19,13 @@ export class PartyRepository implements IPartyRepository {
     return this.repo.findOne({ where: { code } });
   }
 
+  findByLedgerAccountId(ledgerAccountId: string): Promise<Party | null> {
+    return this.repo.findOne({
+      where: { ledger_account_id: ledgerAccountId },
+      relations: ['ledgerAccount'],
+    });
+  }
+
   findAll(activeOnly = true): Promise<Party[]> {
     return this.repo.find({
       where: activeOnly ? { is_active: true } : undefined,

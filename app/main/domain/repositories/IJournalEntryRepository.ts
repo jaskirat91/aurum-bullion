@@ -21,4 +21,6 @@ export interface IJournalEntryRepository {
   save(entry: JournalEntry): Promise<JournalEntry>;
   /** Generate the next sequential voucher number e.g. JV-2024-001 */
   generateNextVoucherNo(): Promise<string>;
+  getOrderTransactions(orderVoucherId: string, accountId: string, isCustomerOrder: boolean): Promise<any[]>;
+  getOrderFulfillmentStats(orderVoucherId: string, accountId: string, isCustomerOrder: boolean, em?: any): Promise<any>;
 }

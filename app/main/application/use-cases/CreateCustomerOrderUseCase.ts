@@ -60,7 +60,11 @@ export class CreateCustomerOrderUseCase {
       if (dto.narration?.trim()) {
         narration = dto.narration.trim();
       } else {
-        narration = `Customer Order (${dto.orderType}) for ${customerAccount.name}`;
+        if (dto.orderType == OrderType.BUY) {
+          narration = `Buy from Customer (${customerAccount.name}) ${dto.goldWeight?.toFixed(3)}g @ ₹${dto.goldRate?.toLocaleString('en-IN')}/g = ₹${dto.amount?.toLocaleString('en-IN')}`;
+        } else {
+          narration = `Sell to Customer (${customerAccount.name}) ${dto.goldWeight?.toFixed(3)}g @ ₹${dto.goldRate?.toLocaleString('en-IN')}/g = ₹${dto.amount?.toLocaleString('en-IN')}`;
+        }
       }
 
       // 4. Create Voucher
@@ -97,55 +101,14 @@ export class CreateCustomerOrderUseCase {
         const goldWeight = dto.goldWeight || 0;
 
         if (dto.orderType === 'BUY') {
-          // Buy Order: Dr Amount from Customer, Cr Gold from Customer
-          // Contra: Cr Amount from default cash, Dr Gold from default gold
-          if (amount > 0) {
-            const customerDr = new LedgerEntry();
-            customerDr.accountId = dto.accountId;
-            customerDr.debitAmount = amount;
-            customerDr.creditAmount = 0;
-            customerDr.narration = `Buy Order Amount - ${voucherNo}`;
-            customerDr.journalEntry = je;
-            entries.push(customerDr);
-
-            const cashCr = new LedgerEntry();
-            cashCr.accountId = defaultCashAccountId;
-            cashCr.debitAmount = 0;
-            cashCr.creditAmount = amount;
-            cashCr.narration = `Buy Order Amount Contra - ${voucherNo}`;
-            cashCr.journalEntry = je;
-            entries.push(cashCr);
-          }
-          if (goldWeight > 0) {
-            const customerCr = new LedgerEntry();
-            customerCr.accountId = dto.accountId;
-            customerCr.debitAmount = 0;
-            customerCr.creditAmount = 0;
-            customerCr.debitGold = 0;
-            customerCr.creditGold = goldWeight;
-            customerCr.narration = `Buy Order Gold - ${voucherNo}`;
-            customerCr.journalEntry = je;
-            entries.push(customerCr);
-
-            const goldDr = new LedgerEntry();
-            goldDr.accountId = defaultGoldAccountId;
-            goldDr.debitAmount = 0;
-            goldDr.creditAmount = 0;
-            goldDr.debitGold = goldWeight;
-            goldDr.creditGold = 0;
-            goldDr.narration = `Buy Order Gold Contra - ${voucherNo}`;
-            goldDr.journalEntry = je;
-            entries.push(goldDr);
-          }
-        } else {
-          // Sell Order: Cr Amount from Customer, Dr Gold from Customer
+          // Buy Order: Cr Amount from Customer, Dr Gold from Customer (Trader buys from customer)
           // Contra: Dr Amount from default cash, Cr Gold from default gold
           if (amount > 0) {
             const customerCr = new LedgerEntry();
             customerCr.accountId = dto.accountId;
             customerCr.debitAmount = 0;
             customerCr.creditAmount = amount;
-            customerCr.narration = `Sell Order Amount - ${voucherNo}`;
+            customerCr.narration = `Buy Order Amount - ${voucherNo}`;
             customerCr.journalEntry = je;
             entries.push(customerCr);
 
@@ -153,7 +116,7 @@ export class CreateCustomerOrderUseCase {
             cashDr.accountId = defaultCashAccountId;
             cashDr.debitAmount = amount;
             cashDr.creditAmount = 0;
-            cashDr.narration = `Sell Order Amount Contra - ${voucherNo}`;
+            cashDr.narration = `Buy Order Amount Contra - ${voucherNo}`;
             cashDr.journalEntry = je;
             entries.push(cashDr);
           }
@@ -164,7 +127,7 @@ export class CreateCustomerOrderUseCase {
             customerDr.creditAmount = 0;
             customerDr.debitGold = goldWeight;
             customerDr.creditGold = 0;
-            customerDr.narration = `Sell Order Gold - ${voucherNo}`;
+            customerDr.narration = `Buy Order Gold - ${voucherNo}`;
             customerDr.journalEntry = je;
             entries.push(customerDr);
 
@@ -174,9 +137,50 @@ export class CreateCustomerOrderUseCase {
             goldCr.creditAmount = 0;
             goldCr.debitGold = 0;
             goldCr.creditGold = goldWeight;
-            goldCr.narration = `Sell Order Gold Contra - ${voucherNo}`;
+            goldCr.narration = `Buy Order Gold Contra - ${voucherNo}`;
             goldCr.journalEntry = je;
             entries.push(goldCr);
+          }
+        } else {
+          // Sell Order: Dr Amount from Customer, Cr Gold from Customer (Trader sells to customer)
+          // Contra: Cr Amount from default cash, Dr Gold from default gold
+          if (amount > 0) {
+            const customerDr = new LedgerEntry();
+            customerDr.accountId = dto.accountId;
+            customerDr.debitAmount = amount;
+            customerDr.creditAmount = 0;
+            customerDr.narration = `Sell Order Amount - ${voucherNo}`;
+            customerDr.journalEntry = je;
+            entries.push(customerDr);
+
+            const cashCr = new LedgerEntry();
+            cashCr.accountId = defaultCashAccountId;
+            cashCr.debitAmount = 0;
+            cashCr.creditAmount = amount;
+            cashCr.narration = `Sell Order Amount Contra - ${voucherNo}`;
+            cashCr.journalEntry = je;
+            entries.push(cashCr);
+          }
+          if (goldWeight > 0) {
+            const customerCr = new LedgerEntry();
+            customerCr.accountId = dto.accountId;
+            customerCr.debitAmount = 0;
+            customerCr.creditAmount = 0;
+            customerCr.debitGold = 0;
+            customerCr.creditGold = goldWeight;
+            customerCr.narration = `Sell Order Gold - ${voucherNo}`;
+            customerCr.journalEntry = je;
+            entries.push(customerCr);
+
+            const goldDr = new LedgerEntry();
+            goldDr.accountId = defaultGoldAccountId;
+            goldDr.debitAmount = 0;
+            goldDr.creditAmount = 0;
+            goldDr.debitGold = goldWeight;
+            goldDr.creditGold = 0;
+            goldDr.narration = `Sell Order Gold Contra - ${voucherNo}`;
+            goldDr.journalEntry = je;
+            entries.push(goldDr);
           }
         }
 

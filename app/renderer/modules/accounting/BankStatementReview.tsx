@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   CheckCircle2, AlertTriangle, AlertCircle, Save, Trash2, 
-  ArrowDownRight, ArrowUpRight, Calendar, User, Search
+  ArrowDownRight, ArrowUpRight, Calendar, User, Search,
+  ArrowLeft
 } from 'lucide-react';
 import { Button } from '@/components/Button';
 import { PartySelect } from '@/components/PartySelect';
@@ -133,8 +134,8 @@ export function BankStatementReview({ importId, onClose, onSuccess }: BankStatem
       {/* Header */}
       <div className="px-6 py-4 border-b border-border/40 bg-surface/50 backdrop-blur-md flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={onClose} className="rounded-xl h-9 w-9 p-0">
-            <Trash2 size={18} />
+          <Button variant="ghost" size="sm" onClick={onClose} className="rounded-xl p-0">
+            <ArrowLeft size={18} />
           </Button>
           <div>
             <h1 className="text-xl font-black tracking-tight text-text flex items-center gap-2">

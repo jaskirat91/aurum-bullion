@@ -600,6 +600,39 @@ export function setupIpcHandlers(ipcMain: IpcMain) {
     return await setupService.getPartyBalances(partyId);
   });
 
+  ipcMain.handle('query:get-party-by-account-id', async (_event, accountId: string) => {
+    try {
+      const data = await partyRepo.findByLedgerAccountId(accountId);
+      return { success: true, data };
+    } catch (err: unknown) {
+      return { success: false, error: String(err) };
+    }
+  });
+
+  ipcMain.handle('query:get-open-orders-by-account-id', async (_event, accountId: string, partyType: string) => {
+    try {
+      if (partyType === 'CUSTOMER') {
+        const data = await customerOrderRepo.findOpenOrdersByAccountId(accountId);
+        return { success: true, data };
+      } else if (partyType === 'SUPPLIER') {
+        const data = await supplierOrderRepo.findOpenOrdersByAccountId(accountId);
+        return { success: true, data };
+      }
+      return { success: true, data: [] };
+    } catch (err: unknown) {
+      return { success: false, error: String(err) };
+    }
+  });
+
+  ipcMain.handle('query:get-order-transactions', async (_event, orderVoucherId: string, accountId: string, isCustomerOrder: boolean) => {
+    try {
+      const data = await journalRepo.getOrderTransactions(orderVoucherId, accountId, isCustomerOrder);
+      return { success: true, data };
+    } catch (err: unknown) {
+      return { success: false, error: String(err) };
+    }
+  });
+
   ipcMain.handle('query:get-account-balances', async (_event, accountId: string) => {
     return await setupService.getAccountBalances(accountId);
   });

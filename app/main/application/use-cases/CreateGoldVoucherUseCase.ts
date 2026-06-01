@@ -16,12 +16,22 @@ export interface CreateGoldVoucherDTO {
   narration?: string;
   remarks?: string;
   remarksTime?: string;
+  customerOrderVoucherId?: string;
+  supplierOrderVoucherId?: string;
   status: VoucherStatus;
 }
 
 export class CreateGoldVoucherUseCase {
   async execute(dto: CreateGoldVoucherDTO): Promise<{ success: boolean; voucherNo: string }> {
     return AppDataSource.transaction(async (em) => {
+      // ... (imports)
+      const { CustomerOrderVoucher } = require('../../domain/entities/CustomerOrderVoucher');
+      const { SupplierOrderVoucher } = require('../../domain/entities/SupplierOrderVoucher');
+      const { OrderStatus } = require('../../domain/entities/OrderStatus');
+      const {
+        JournalEntryRepository,
+      } = require('../../infrastructure/repositories/JournalEntryRepository');
+
       // 1. Validate party account
       const accountRepo = em.getRepository(Account);
       const partyAccount = await accountRepo.findOne({
@@ -81,6 +91,12 @@ export class CreateGoldVoucherUseCase {
       goldVoucher.issueAmount = dto.issueAmount;
       goldVoucher.remarks = dto.remarks;
       goldVoucher.remarksTime = dto.remarksTime;
+      if (dto.customerOrderVoucherId) {
+        goldVoucher.customerOrderVoucherId = dto.customerOrderVoucherId;
+      }
+      if (dto.supplierOrderVoucherId) {
+        goldVoucher.supplierOrderVoucherId = dto.supplierOrderVoucherId;
+      }
       await em.save(goldVoucher);
 
       // 6. Create Ledger Entries if POSTED
@@ -93,12 +109,6 @@ export class CreateGoldVoucherUseCase {
         je.status = JournalEntryStatus.POSTED;
 
         const entries: LedgerEntry[] = [];
-
-        // Logic:
-        // Receipt Gold: Party CR Gold, Default Gold DR Gold
-        // Issue Gold: Party DR Gold, Default Gold CR Gold
-        // Receipt Amount: Party CR Amount, Default Cash DR Amount
-        // Issue Amount: Party DR Amount, Default Cash CR Amount
 
         // Gold Entries
         if ((dto.receiptGold || 0) > 0 || (dto.issueGold || 0) > 0) {
@@ -148,6 +158,41 @@ export class CreateGoldVoucherUseCase {
 
         je.ledgerEntries = entries;
         await em.save(je);
+
+        // 7. Order Fulfillment Logic
+        if (dto.customerOrderVoucherId || dto.supplierOrderVoucherId) {
+          const orderId = dto.customerOrderVoucherId || dto.supplierOrderVoucherId;
+          const isCustomerOrder = !!dto.customerOrderVoucherId;
+          const orderRepo = isCustomerOrder
+            ? em.getRepository(CustomerOrderVoucher)
+            : em.getRepository(SupplierOrderVoucher);
+
+          const order = await orderRepo.findOne({ where: { voucherId: orderId } });
+          if (order) {
+            const journalRepo = new JournalEntryRepository();
+            const stats = await journalRepo.getOrderFulfillmentStats(
+              orderId!,
+              dto.partyAccountId,
+              isCustomerOrder,
+              em,
+            );
+
+            const netAmount = Math.abs(
+              (Number(stats.totalDebitAmount) || 0) - (Number(stats.totalCreditAmount) || 0),
+            );
+            const netGold = Math.abs(
+              (Number(stats.totalDebitGold) || 0) - (Number(stats.totalCreditGold) || 0),
+            );
+
+            const orderAmount = Number(order.amount) || 0;
+            const orderGold = Number(order.goldWeight) || 0;
+
+            if (netAmount >= orderAmount && netGold >= orderGold) {
+              order.orderStatus = OrderStatus.COMPLETED;
+              await orderRepo.save(order);
+            }
+          }
+        }
       }
 
       return { success: true, voucherNo };

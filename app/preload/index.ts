@@ -49,6 +49,13 @@ export type ElectronAPI = {
   getPartyBalances: (partyId: string) => Promise<IPCResult<{ gold: any; cash: any }>>;
   getAccountBalances: (accountId: string) => Promise<IPCResult<{ gold: any; cash: any }>>;
   getBatchDetails: (batchNo: string) => Promise<IPCResult<any>>;
+  getPartyByAccountId: (accountId: string) => Promise<IPCResult<any>>;
+  getOpenOrdersByAccountId: (accountId: string, partyType: string) => Promise<IPCResult<any[]>>;
+  getOrderTransactions: (
+    orderVoucherId: string,
+    accountId: string,
+    isCustomerOrder: boolean,
+  ) => Promise<IPCResult<any[]>>;
   listBatches: (filters?: {
     assignedTo?: string;
     status?: string;
@@ -236,6 +243,12 @@ const api: ElectronAPI = {
   getPartyBalances: (partyId) => ipcRenderer.invoke('query:get-party-balances', partyId),
   getAccountBalances: (accountId) => ipcRenderer.invoke('query:get-account-balances', accountId),
   getBatchDetails: (batchNo) => ipcRenderer.invoke('query:get-batch-details', batchNo),
+  getPartyByAccountId: (accountId) =>
+    ipcRenderer.invoke('query:get-party-by-account-id', accountId),
+  getOpenOrdersByAccountId: (accountId, partyType) =>
+    ipcRenderer.invoke('query:get-open-orders-by-account-id', accountId, partyType),
+  getOrderTransactions: (orderVoucherId, accountId, isCustomerOrder) =>
+    ipcRenderer.invoke('query:get-order-transactions', orderVoucherId, accountId, isCustomerOrder),
   listJournalEntries: () => ipcRenderer.invoke('query:list-journal-entries'),
   getPaginatedJournals: (page, limit, filters) =>
     ipcRenderer.invoke('query:get-paginated-journals', page, limit, filters),

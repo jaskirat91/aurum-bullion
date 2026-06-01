@@ -29,6 +29,10 @@ export class GoldVoucherRepository {
       .createQueryBuilder('gv')
       .leftJoinAndSelect('gv.voucher', 'voucher')
       .leftJoinAndSelect('gv.partyAccount', 'partyAccount')
+      .leftJoinAndSelect('gv.customerOrderVoucher', 'cov')
+      .leftJoinAndSelect('gv.supplierOrderVoucher', 'sov')
+      .leftJoinAndSelect('cov.voucher', 'customerOrderVoucher')
+      .leftJoinAndSelect('sov.voucher', 'supplierOrderVoucher')
       .orderBy('voucher.entryDate', 'DESC')
       .addOrderBy('gv.createdAt', 'DESC')
       .skip(skip)
@@ -68,7 +72,7 @@ export class GoldVoucherRepository {
   async getDetails(voucherId: string): Promise<GoldVoucher | null> {
     return this.repo.findOne({
       where: { voucherId },
-      relations: ['voucher', 'partyAccount'],
+      relations: ['voucher', 'partyAccount', 'customerOrderVoucher', 'supplierOrderVoucher'],
     });
   }
 

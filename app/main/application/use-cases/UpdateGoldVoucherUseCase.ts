@@ -108,6 +108,8 @@ export class UpdateGoldVoucherUseCase {
       gv.issueAmount = dto.issueAmount;
       gv.remarks = dto.remarks;
       gv.remarksTime = dto.remarksTime;
+      gv.customerOrderVoucherId = dto.customerOrderVoucherId ? dto.customerOrderVoucherId : null!;
+      gv.supplierOrderVoucherId = dto.supplierOrderVoucherId ? dto.supplierOrderVoucherId : null!;
       await em.save(gv);
 
       // 8. Handle Ledger Entries (Wipe and Recreate to ensure integrity)
@@ -126,6 +128,14 @@ export class UpdateGoldVoucherUseCase {
 
       // If the voucher is now POSTED, create a fresh Journal Entry and Ledger Entries
       if (dto.status === VoucherStatus.POSTED) {
+        // ... (existing imports)
+        const { CustomerOrderVoucher } = require('../../domain/entities/CustomerOrderVoucher');
+        const { SupplierOrderVoucher } = require('../../domain/entities/SupplierOrderVoucher');
+        const { OrderStatus } = require('../../domain/entities/OrderStatus');
+        const {
+          JournalEntryRepository,
+        } = require('../../infrastructure/repositories/JournalEntryRepository');
+
         const je = new JournalEntry();
         je.voucherId = voucher.id;
         je.entryDate = dto.entryDate;
@@ -180,6 +190,41 @@ export class UpdateGoldVoucherUseCase {
 
         if (entries.length > 0) {
           await em.save(LedgerEntry, entries);
+        }
+
+        // 9. Order Fulfillment Logic
+        if (dto.customerOrderVoucherId || dto.supplierOrderVoucherId) {
+          const orderId = dto.customerOrderVoucherId || dto.supplierOrderVoucherId;
+          const isCustomerOrder = !!dto.customerOrderVoucherId;
+          const orderRepo = isCustomerOrder
+            ? em.getRepository(CustomerOrderVoucher)
+            : em.getRepository(SupplierOrderVoucher);
+
+          const order = await orderRepo.findOne({ where: { voucherId: orderId } });
+          if (order) {
+            const journalRepo = new JournalEntryRepository();
+            const stats = await journalRepo.getOrderFulfillmentStats(
+              orderId!,
+              dto.partyAccountId,
+              isCustomerOrder,
+              em,
+            );
+
+            const netAmount = Math.abs(
+              (Number(stats.totalDebitAmount) || 0) - (Number(stats.totalCreditAmount) || 0),
+            );
+            const netGold = Math.abs(
+              (Number(stats.totalDebitGold) || 0) - (Number(stats.totalCreditGold) || 0),
+            );
+
+            const orderAmount = Number(order.amount) || 0;
+            const orderGold = Number(order.goldWeight) || 0;
+
+            if (netAmount >= orderAmount && netGold >= orderGold) {
+              order.orderStatus = OrderStatus.COMPLETED;
+              await orderRepo.save(order);
+            }
+          }
         }
       }
 
