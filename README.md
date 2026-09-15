@@ -1,167 +1,142 @@
-# Aurum Bullion — Jewellery Accounting System
+# Aurum Bullion - Jewellery & Bullion Accounting Software
 
-A **production-grade, cross-platform desktop application** for jewellery accounting with batch-level gold tracking and full double-entry bookkeeping.
+> **Production-grade Electron + React accounting system tailored for the jewellery and bullion industry, built with Clean Architecture and Domain-Driven Design (DDD).**
+
+## 📖 Overview
+
+**Aurum Bullion** is a focused, desktop-based accounting and inventory management software engineered for jewellers and bullion traders. By combining the power of modern web technologies (React, TypeScript, Vite) with the native desktop capabilities of Electron, it delivers a high-performance, secure, and intuitive experience. The system uses SQLite as the local database, ensuring data integrity, offline capability, and maximum privacy.
 
 ---
 
-## 🏗️ Architecture
+## ✨ Core Features
 
-```
-/app
-  /main                     ← Electron main process (Node.js backend)
-    /domain
-      /entities             ← TypeORM entities (Batch, Account, Party, …)
-      /repositories         ← Repository interfaces (IBatchRepository, …)
-      /services             ← Domain services (AccountingService, WeightCalculationService)
-      /value-objects        ← Weight, Money value objects
-    /application
-      /use-cases            ← Business use cases (all transactional)
-    /infrastructure
-      /database             ← TypeORM DataSource (SQLite, SQLCipher-ready)
-      /repositories         ← Concrete implementations
-      /security             ← keytar-based key management (stub → production)
-    /interfaces
-      /ipc                  ← Electron IPC handlers (main ↔ renderer bridge)
+Based on the active modules, the application provides the following core functionalities:
 
-  /preload                  ← Electron context bridge (typed API surface)
+### 📊 1. Accounting Management
+- **Cash Vouchers:** Create and manage cash receipts and payment vouchers.
+- **Gold Vouchers:** Specialized vouchers for tracking metal (fine gold/silver) balances alongside currency.
+- **Manage Journal:** Standard double-entry bookkeeping for complex adjustments and transfers.
+- **Accounts:** Dedicated section to manage and review individual accounts.
+- **Customer & Supplier Orders:** Track and process orders from customers and to suppliers.
 
-  /renderer                 ← React frontend
-    /modules
-      /inventory            ← Receipt Entry, Issue Material forms
-      /manufacturing        ← Receive Finished Product form
-      /accounting           ← Journal Entry form
-    /components             ← Reusable: Button, FormField, StatusChip
-    /store                  ← Zustand state management
-    /hooks                  ← useIpc (generic IPC calling hook)
-```
+### 👥 2. Party Directory
+- **Party Directory:** A central ledger to view and manage all business parties (Customers, Suppliers, etc.).
+- **Register New Party:** Streamlined onboarding for adding new parties to the system with their opening balances and details.
 
-### Key Design Decisions
+### 📦 3. Inventory
+- **Items Master:** Define and manage the catalog of items handled by the business, including categories and groups.
 
-| Concern          | Decision                                                                 |
-| ---------------- | ------------------------------------------------------------------------ |
-| **Architecture** | DDD + Clean Architecture (strict layer separation)                       |
-| **ORM**          | TypeORM with decorators                                                  |
-| **Database**     | SQLite (`synchronize: true` in dev; use migrations in prod)              |
-| **Encryption**   | SQLCipher-ready — swap `type: 'sqlite'` for `better-sqlite3-with-cipher` |
-| **Key storage**  | OS keychain via `keytar` (stub in place, production class commented in)  |
-| **Transactions** | Unit of Work via `AppDataSource.transaction()` in every use case         |
-| **State**        | Zustand (renderer only)                                                  |
-| **IPC**          | Typed `contextBridge` with `ipcRenderer.invoke` / `ipcMain.handle`       |
+### 📈 4. Financial Reports
+- **Account Statement:** Generate detailed statements for individual accounts showing all transaction history.
+- **Lena Dena Report:** A consolidated dashboard tracking "Lena" (Receivables) and "Dena" (Payables), giving an immediate snapshot of outstanding balances in both monetary and metal terms.
+
+### ⚙️ 5. System Setup & Administration
+- **Setup Wizard:** Streamlined onboarding for first-time company setup.
+- **Licensing:** Built-in License Wizard for software activation.
+- **Local Data Security:** Fully local SQLite database (`aurum-ledger.sqlite`) ensuring absolute privacy and data sovereignty.
+
+---
+
+## 🛠️ Technology Stack
+
+- **Framework:** Electron (Desktop Environment)
+- **Frontend:** React 18, Vite, TypeScript
+- **Styling:** Tailwind CSS, PostCSS, Lucide React (Icons)
+- **State Management:** Zustand
+- **Database / ORM:** SQLite3, TypeORM
+- **Architecture:** Clean Architecture, Domain-Driven Design (DDD)
 
 ---
 
 ## 🚀 Getting Started
 
+Follow these steps to set up the development environment locally.
+
 ### Prerequisites
+- [Node.js](https://nodejs.org/en/) (v18 or higher recommended)
+- Git
 
-- Node.js ≥ 18
-- npm ≥ 9
+### Installation
 
-### Install
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-username/aurum-bullion.git
+   cd aurum-bullion
+   ```
 
-```bash
-npm install
-```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-### Development
+3. **Run the application in Development Mode:**
+   ```bash
+   npm run dev
+   ```
+   > This command uses `concurrently` to launch the Vite dev server for the React frontend and automatically boot the Electron application.
 
-```bash
-npm run dev
-```
+### Build & Packaging
 
-This starts:
+To compile the TypeScript code, build the React frontend, and package the application into a distributable executable:
 
-1. **Vite dev server** on `http://localhost:5173` (hot-reload React)
-2. **Electron** (waits for Vite, then compiles main process and launches)
+- **Build everything:**
+  ```bash
+  npm run build
+  ```
+- **Package for macOS (.dmg):**
+  ```bash
+  npm run dist:mac
+  ```
+- **Package for Windows (.exe):**
+  ```bash
+  npm run dist:win
+  ```
+- **Package for Linux (.AppImage, .deb):**
+  ```bash
+  npm run dist:linux
+  ```
 
-### Build (Production)
-
-```bash
-npm run build
-```
-
-### Package (Distributable)
-
-```bash
-npx electron-builder
-```
-
----
-
-## 📦 Core Modules
-
-### Inventory (Raw Material)
-
-| Screen         | IPC Channel                      | Use Case                                |
-| -------------- | -------------------------------- | --------------------------------------- |
-| Receipt Entry  | `inventory:receive-raw-material` | `ReceiveRawMaterialUseCase`             |
-| Issue Material | `inventory:issue-raw-material`   | `IssueRawMaterialToManufacturerUseCase` |
-
-### Manufacturing
-
-| Screen                   | IPC Channel                              | Use Case                        |
-| ------------------------ | ---------------------------------------- | ------------------------------- |
-| Receive Finished Product | `manufacturing:receive-finished-product` | `ReceiveFinishedProductUseCase` |
-
-### Accounting
-
-| Screen        | IPC Channel                       | Use Case                    |
-| ------------- | --------------------------------- | --------------------------- |
-| Journal Entry | `accounting:create-journal-entry` | `CreateJournalEntryUseCase` |
+*Build artifacts will be located in the `release/` directory.*
 
 ---
 
-## 🏦 Business Rules
+## 🏗️ Project Structure
 
-1. **Every MaterialTransaction** must be linked to a Batch
-2. **Batch lifecycle**: `RECEIVED → WIP → COMPLETED`
-3. **Double-entry**: `Σ Debit == Σ Credit` enforced in `AccountingService.assertBalanced()`
-4. **LedgerEntry**: must be debit-only OR credit-only (validated on `@BeforeInsert`)
-5. **All writes** are wrapped in `AppDataSource.transaction()` (Unit of Work pattern)
+The project strictly follows Clean Architecture principles, separating concerns between the UI, Application logic, Domain models, and Infrastructure.
 
----
-
-## 🔐 Security Roadmap
-
-| Step                                             | Status                                    |
-| ------------------------------------------------ | ----------------------------------------- |
-| SQLite (plain)                                   | ✅ Done                                   |
-| keytar stub (no-op)                              | ✅ Done                                   |
-| keytar production (`KeytarKeyManagementService`) | 🔲 Uncomment in `KeyManagementService.ts` |
-| SQLCipher integration                            | 🔲 Swap driver in `data-source.ts`        |
-
----
-
-## 🧑‍💻 Developer Scripts
-
-```bash
-npm run dev           # Start dev (Vite + Electron)
-npm run build         # Production build (main + renderer)
-npm run lint          # ESLint check
-npm run lint:fix      # ESLint auto-fix
-npm run format        # Prettier format
-npm run format:check  # Prettier check
-npm run typecheck     # Full TypeScript check (main + renderer)
+```
+app/
+├── main/                 # Electron Main Process (Backend)
+│   ├── application/      # Use Cases / Application Services
+│   ├── domain/           # Entities, Value Objects, Domain Interfaces
+│   ├── infrastructure/   # TypeORM, SQLite Repositories, Security
+│   └── interfaces/       # IPC Controllers
+├── renderer/             # Electron Renderer Process (Frontend - React)
+│   ├── components/       # Reusable UI Components
+│   ├── modules/          # Feature Modules (Accounting, Inventory, Parties, Reports)
+│   ├── store/            # Zustand State Store
+│   └── context/          # React Contexts
+└── preload/              # Electron Preload Scripts (IPC Bridge)
 ```
 
 ---
 
-## 📝 Adding a New Use Case
+## 📝 Code Quality & Linting
 
-1. **Domain**: Add/update entity in `app/main/domain/entities/`
-2. **Repository interface**: Add method to `app/main/domain/repositories/I*.ts`
-3. **Repository impl**: Implement in `app/main/infrastructure/repositories/`
-4. **Use case**: Create in `app/main/application/use-cases/` (wrap in `AppDataSource.transaction`)
-5. **IPC handler**: Register in `app/main/interfaces/ipc/handlers.ts`
-6. **Preload**: Expose new method in `app/preload/index.ts`
-7. **UI**: Add form/component in `app/renderer/modules/`
+To ensure code quality and consistency across the project:
+
+- **Type Check:** `npm run typecheck`
+- **Linting:** `npm run lint`
+- **Auto-Fix Lint Errors:** `npm run lint:fix`
+- **Format Code (Prettier):** `npm run format`
 
 ---
 
-## 📁 Database
+## 🤝 Contributing
 
-The SQLite file is stored in the OS user-data directory:
+Contributions, issues, and feature requests are welcome! 
+Feel free to check the [issues page](https://github.com/your-username/aurum-bullion/issues).
 
-- **macOS**: `~/Library/Application Support/aurum-ledger/aurum_ledger.sqlite`
-- **Windows**: `%APPDATA%\aurum-ledger\aurum_ledger.sqlite`
-- **Linux**: `~/.config/aurum-ledger/aurum_ledger.sqlite`
+## 📄 License
+
+[Specify your license here, e.g., MIT, Proprietary, etc.]
